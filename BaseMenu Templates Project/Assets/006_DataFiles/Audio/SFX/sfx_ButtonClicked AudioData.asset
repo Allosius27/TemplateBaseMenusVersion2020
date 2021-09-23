@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: sfx_ButtonClicked AudioData
   m_EditorClassIdentifier: 
   sound:
-    clip: {fileID: 8300000, guid: 4f13633ea56974e6dbf63eb99fa6c851, type: 3}
+    clip: {fileID: 8300000, guid: 0c53d81f22504f847823a39ab8642ab4, type: 3}
     parameters:
       typeSound: 0
-      volume: 0.218
+      volume: 0.14
       volume3d: 0.53
       pitch: 1
       loop: 0
