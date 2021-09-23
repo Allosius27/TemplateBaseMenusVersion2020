@@ -7,46 +7,87 @@ using System.Linq;
 
 public class SettingsMenu : MonoBehaviour
 {
+    #region Fields
+
     private MainMenu mainMenu;
 
-    [SerializeField] private AudioMixer musicsAudioMixer, sfxAudioMixer;
+    private Resolution[] resolutions;
+    private List<Resolution> listRes = new List<Resolution>();
+    private List<string> options = new List<string>();
 
-    //public Dropdown resolutionDropDown;
+    #endregion
 
-    public GameObject Settings;
+    #region Properties
 
-    [SerializeField] private GameObject Controls;
-    public bool windowControls;
+    public bool windowControls { get; set; }
 
-    //Resolution[] resolutions;
+    public TabButtonCtrl CurrentActiveTabSettingMenu => currentActiveTabSettingMenu;
+
+    #endregion
+
+    #region UnityInspector
+
+    [SerializeField] private AudioMixer musicsAudioMixer, sfxAudioMixer, ambientsAudioMixer;
+
+    [SerializeField] private Dropdown resolutionDropDown;
+
+    [SerializeField] private GameObject settings;
+
+    [SerializeField] private TabButtonCtrl currentActiveTabSettingMenu;
+    #endregion
 
     // Start is called before the first frame update
     void Start()
     {
         mainMenu = FindObjectOfType<MainMenu>();
 
-        //resolutions = Screen.resolutions.Select(resolution => new Resolution { width = resolution.width, height = resolution.height }).Distinct().ToArray();
+        resolutions = Screen.resolutions.Select(resolution => new Resolution { width = resolution.width, height = resolution.height }).Distinct().ToArray();
+        //resolutions = Screen.resolutions;
+        Debug.Log(resolutions.Length);
 
-        //resolutionDropDown.ClearOptions();
-
-        /*List<string> options = new List<string>();
-
-        int currentResolutionIndex = 0;
         for (int i = 0; i < resolutions.Length; i++)
         {
-            string option = resolutions[i].width + "x" + resolutions[i].height;
+            if (listRes.Contains(resolutions[i]) == false)
+            {
+                float ratio = (float)(resolutions[i].width) / (float)(resolutions[i].height);
+                Debug.Log(resolutions[i].width + " " + resolutions[i].height);
+                Debug.Log(ratio);
+
+                if (ratio >= 1.77f - 0.1f && ratio < 1.77f + 0.1f)
+                {
+                    listRes.Add(resolutions[i]);
+                }
+            }
+        }
+
+        resolutionDropDown.ClearOptions();
+
+        //listRes.Add(Screen.currentResolution);
+        //options.Add(Screen.currentResolution.width + "x" + Screen.currentResolution.height);
+
+        int currentResolutionIndex = 0;
+        for (int i = 0; i < listRes.Count; i++)
+        {
+            //listRes.Add(resolutions[i]);
+
+            string option = listRes[i].width + "x" + listRes[i].height;
+            Debug.Log(option);
             options.Add(option);
 
-            if (resolutions[i].width == Screen.currentResolution.width &&
-                resolutions[i].height == Screen.currentResolution.height)
+            if (listRes[i].width == Screen.width &&
+                listRes[i].height == Screen.height)
             {
                 currentResolutionIndex = i;
             }
-        }*/
+        }
+        Debug.Log(Screen.width);
+        Debug.Log(Screen.height);
 
-        //resolutionDropDown.AddOptions(options);
-        //resolutionDropDown.value = currentResolutionIndex;
-        //resolutionDropDown.RefreshShownValue();
+        Debug.Log(listRes.Count);
+
+        resolutionDropDown.AddOptions(options);
+        resolutionDropDown.value = currentResolutionIndex;
+        resolutionDropDown.RefreshShownValue();
 
         Screen.fullScreen = true;
     }
@@ -66,11 +107,16 @@ public class SettingsMenu : MonoBehaviour
         }
     }
 
-    /*public void SetResolution(int resolutionIndex)
+    public void SetCurrentActiveTabSettingMenu(TabButtonCtrl _button)
     {
-        Resolution resolution = resolutions[resolutionIndex];
+        currentActiveTabSettingMenu = _button;
+    }
+
+    public void SetResolution(int resolutionIndex)
+    {
+        Resolution resolution = listRes[resolutionIndex];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
-    }*/
+    }
 
     public void SetMusicsVolume(float volume)
     {
@@ -82,10 +128,9 @@ public class SettingsMenu : MonoBehaviour
         sfxAudioMixer.SetFloat("volume", volume);
     }
 
-    public void ControlsMenu()
+    public void SetAmbientsVolume(float volume)
     {
-        Controls.SetActive(true);
-        windowControls = true;
+        ambientsAudioMixer.SetFloat("volume", volume);
     }
 
     public void SetFullScreen(bool isFullScreen)
@@ -95,11 +140,12 @@ public class SettingsMenu : MonoBehaviour
 
     public void ExitSettings()
     {
-        Settings.SetActive(false);
         if (mainMenu != null)
         {
             mainMenu.activesButtons = true;
             mainMenu.enabled = true;
         }
+
+        settings.SetActive(false);
     }
 }

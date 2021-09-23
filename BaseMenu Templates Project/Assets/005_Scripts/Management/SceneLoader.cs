@@ -47,14 +47,18 @@ public class SceneLoader : AllosiusDev.Singleton<SceneLoader>
     {
         yield return new WaitForSeconds(timeToWait);
 
+        AllosiusDev.AudioManager.StopAllAmbients();
+        Debug.Log("StopAllAmbients");
+
         AsyncOperation operation = SceneManager.LoadSceneAsync((int)(object)_sceneData.sceneToLoad);
 
         while (!operation.isDone)
         {
             float progress = Mathf.Clamp01(operation.progress / 0.9f);
 
-            _loadingScreen.slider.value = progress;
-            _loadingScreen.progressText.text = progress * 100f + "%";
+            //_loadingScreen.slider.value = progress;
+            _loadingScreen.uiProgressBar.SetFill(progress);
+            _loadingScreen.progressText.text = (int)(progress * 100f) + "%";
 
             if (operation.progress >= 0.8f)
             {

@@ -11,6 +11,8 @@ public class PauseMenu : MonoBehaviour
     public GameObject settingsMenu;
     public GameObject pauseMenuUI;
 
+    [SerializeField] private SceneData mainMenuSceneData;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,7 +22,15 @@ public class PauseMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Escape") && canPause)
+        if (Input.GetButtonDown("Escape"))
+        {
+            MenuPause();
+        }
+    }
+
+    public void MenuPause()
+    {
+        if (canPause)
         {
             if (gameIsPaused)
             {
@@ -65,6 +75,7 @@ public class PauseMenu : MonoBehaviour
     {
         canPause = false;
         Resume();
-        SceneLoader.Instance.ChangeScene(Scenes.MainMenu);
+        AllosiusDev.AudioManager.StopAllMusics();
+        SceneLoader.Instance.ActiveLoadingScreen(mainMenuSceneData, 1.0f);
     }
 }
