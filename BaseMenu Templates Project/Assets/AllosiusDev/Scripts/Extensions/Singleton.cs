@@ -1,3 +1,7 @@
+//
+// Updated by Allosius(Yanis Q.) on 17/10/2021.
+//
+
 using UnityEngine;
 
 namespace AllosiusDev {
