@@ -20,4 +20,5 @@ MonoBehaviour:
       volume3d: 0.53
       pitch: 1
       loop: 0
+      priority: 128
       spacialBlend: 0
