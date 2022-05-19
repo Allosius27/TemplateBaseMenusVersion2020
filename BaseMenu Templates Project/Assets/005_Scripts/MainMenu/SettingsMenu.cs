@@ -21,6 +21,7 @@ public class SettingsMenu : MonoBehaviour
 
     public bool windowControls { get; set; }
 
+    public Button[] TabButtonsCtrls => tabButtonsCtrls;
     public TabButtonCtrl CurrentActiveTabSettingMenu => currentActiveTabSettingMenu;
 
     #endregion
@@ -33,7 +34,9 @@ public class SettingsMenu : MonoBehaviour
 
     [SerializeField] private GameObject settings;
 
+    [SerializeField] private Button[] tabButtonsCtrls;
     [SerializeField] private TabButtonCtrl currentActiveTabSettingMenu;
+
     #endregion
 
     // Start is called before the first frame update
@@ -110,6 +113,24 @@ public class SettingsMenu : MonoBehaviour
     public void SetCurrentActiveTabSettingMenu(TabButtonCtrl _button)
     {
         currentActiveTabSettingMenu = _button;
+
+        for (int i = 0; i < tabButtonsCtrls.Length; i++)
+        {
+            Navigation newNav = new Navigation();
+            newNav.mode = Navigation.Mode.Explicit;
+            newNav.selectOnUp = tabButtonsCtrls[i].navigation.selectOnUp;
+            newNav.selectOnDown = tabButtonsCtrls[i].navigation.selectOnDown;
+            newNav.selectOnLeft = tabButtonsCtrls[i].navigation.selectOnLeft;
+            newNav.selectOnRight = tabButtonsCtrls[i].navigation.selectOnRight;
+
+            if(currentActiveTabSettingMenu.FirstTabButton != null)
+                newNav.selectOnDown = currentActiveTabSettingMenu.FirstTabButton.GetComponent<Selectable>();
+            else
+            {
+                newNav.selectOnDown = null;
+            }
+            tabButtonsCtrls[i].navigation = newNav;
+        }
     }
 
     public void SetResolution(int resolutionIndex)
@@ -138,12 +159,23 @@ public class SettingsMenu : MonoBehaviour
         Screen.fullScreen = isFullScreen;
     }
 
+    public void LaunchSettings()
+    {
+        settings.SetActive(true);
+        UICanvasManager.Instance.EventSystem.SetSelectedGameObject(currentActiveTabSettingMenu.gameObject);
+    }
+
     public void ExitSettings()
     {
         if (mainMenu != null)
         {
             mainMenu.activesButtons = true;
             mainMenu.enabled = true;
+            UICanvasManager.Instance.EventSystem.SetSelectedGameObject(mainMenu.MenuButtons[0].gameObject);
+        }
+        else if(PauseMenu.gameIsPaused)
+        {
+            UICanvasManager.Instance.EventSystem.SetSelectedGameObject(UICanvasManager.Instance.PauseMenu.MenuButtons[0].gameObject);
         }
 
         settings.SetActive(false);

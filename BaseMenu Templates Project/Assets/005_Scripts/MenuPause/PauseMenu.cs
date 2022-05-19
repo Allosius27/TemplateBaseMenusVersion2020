@@ -3,20 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
+    public Button[] MenuButtons => menuButtons;
+
     public static bool gameIsPaused = false;
     public static bool canPause = true;
-    public GameObject settingsMenu;
+
+    public SettingsMenu settingsMenu;
     public GameObject pauseMenuUI;
+
+    [SerializeField] private Button[] menuButtons;
 
     [SerializeField] private SceneData mainMenuSceneData;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        if (SceneManager.GetActiveScene().buildIndex == (int)(object)Scenes.MainMenu || SceneManager.GetActiveScene().buildIndex == (int)(object)Scenes.BootScene)
+        {
+            canPause = false;
+        }
+        else
+        {
+            canPause = true;
+        }
     }
 
     // Update is called once per frame
@@ -47,6 +60,7 @@ public class PauseMenu : MonoBehaviour
     {
         //Afficher le menu pause
         pauseMenuUI.SetActive(true);
+        UICanvasManager.Instance.EventSystem.SetSelectedGameObject(menuButtons[0].gameObject);
         // Arrêter le temps
         Time.timeScale = 0;
         // Changer le statut du jeu (l'état : pause ou jeu actif)
@@ -56,19 +70,19 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        pauseMenuUI.SetActive(false);
-        settingsMenu.SetActive(false);
-
         Time.timeScale = 1;
 
         gameIsPaused = false;
 
+        settingsMenu.ExitSettings();
+        pauseMenuUI.SetActive(false);
     }
 
     public void LoadSettings()
     {
         Debug.Log("Loading Settings menu");
-        settingsMenu.SetActive(true);
+        settingsMenu.LaunchSettings();
+        //settingsMenu.SetActive(true);
     }
 
     public void LoadMainMenu()

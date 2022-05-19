@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ButtonCtrl : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
+    public Button button { get; protected set; }
+
+    public AllosiusDev.AudioData SfxButtonHighlightedObject => sfxButtonHighlightedObject;
+    public AllosiusDev.AudioData SfxButtonClickedObject => sfxButtonClickedObject;
+
     [SerializeField] private AllosiusDev.AudioData sfxButtonHighlightedObject;
     [SerializeField] private AllosiusDev.AudioData sfxButtonClickedObject;
 
@@ -30,7 +36,12 @@ public class ButtonCtrl : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
         Debug.Log("Mouse exit");
     }
 
-    private void Start()
+    private void Awake()
+    {
+        button = GetComponent<Button>();
+    }
+
+    public virtual void Start()
     {
         
     }

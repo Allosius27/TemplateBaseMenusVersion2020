@@ -7,17 +7,28 @@ public class TabButtonCtrl : ButtonCtrl
 {
     private SettingsMenu settingsMenu;
 
+    public GameObject FirstTabButton => firstTabButton;
+
     [SerializeField] private GameObject activeButton;
     [SerializeField] private GameObject menuPanel;
 
-    private void Start()
+    [SerializeField] private GameObject firstTabButton;
+
+    public override void Start()
     {
+        base.Start();
+
         settingsMenu = FindObjectOfType<SettingsMenu>();
     }
 
     public override void OnPointerDown(PointerEventData eventData)
     {
-        base.OnPointerDown(eventData);
+        //ClickButton();
+    }
+
+    public void ClickButton()
+    {
+        AllosiusDev.AudioManager.Play(SfxButtonClickedObject.sound);
 
         if (settingsMenu.CurrentActiveTabSettingMenu != null && settingsMenu.CurrentActiveTabSettingMenu != this)
         {

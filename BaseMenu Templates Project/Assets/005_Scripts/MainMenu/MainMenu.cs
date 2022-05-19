@@ -10,13 +10,18 @@ public class MainMenu : MonoBehaviour
 
     #region Fields
 
+    
+
     #endregion
 
     #region Properties
-    public GameObject SettingsMenu { get; protected set; }
+    public SettingsMenu SettingsMenu { get; protected set; }
 
     public bool activeSettings { get; set; }
     public bool activesButtons { get; set; }
+
+    public Button[] MenuButtons => menuButtons;
+
     #endregion
 
     #region UnityInspector
@@ -25,6 +30,8 @@ public class MainMenu : MonoBehaviour
     //public Button buttonContinue;
 
     //public string loadGameScene;
+
+    [SerializeField] private Button[] menuButtons;
 
     [SerializeField] private SceneData startLevelSceneData;
 
@@ -41,7 +48,7 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
 
-        SettingsMenu = UICanvasManager.Instance.SettingsMenu.gameObject;
+        SettingsMenu = UICanvasManager.Instance.SettingsMenu;
 
         activesButtons = true;
 
@@ -59,6 +66,8 @@ public class MainMenu : MonoBehaviour
         {
             continueActive = false;
         }*/
+
+        UICanvasManager.Instance.EventSystem.SetSelectedGameObject(menuButtons[0].gameObject);
     }
 
     // Update is called once per frame
@@ -72,6 +81,8 @@ public class MainMenu : MonoBehaviour
         {
             buttonContinue.interactable = false;
         }*/
+
+        
     }
 
     /*public void Continue()
@@ -90,7 +101,7 @@ public class MainMenu : MonoBehaviour
     public void Options()
     {
         Debug.Log("Launch Menu Options");
-        SettingsMenu.SetActive(true);
+        SettingsMenu.LaunchSettings();
         activesButtons = false;
         activeSettings = true;
     }
