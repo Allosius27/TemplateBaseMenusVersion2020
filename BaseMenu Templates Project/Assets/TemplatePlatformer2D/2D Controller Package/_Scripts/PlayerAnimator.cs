@@ -1,13 +1,33 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace TarodevController {
-    /// <summary>
-    /// This is a pretty filthy script. I was just arbitrarily adding to it as I went.
-    /// You won't find any programming prowess here.
-    /// This is a supplementary script to help with effects and animation. Basically a juice factory.
-    /// </summary>
-    public class PlayerAnimator : MonoBehaviour {
+namespace Controller2D 
+{
+    public class PlayerAnimator : MonoBehaviour 
+    {
+        #region Fields
+
+        private IPlayerController _player;
+        private ParticleSystem.MinMaxGradient _currentGradient;
+        private Vector2 _movement;
+        private Vector2 _defaultSpriteSize;
+
+        #endregion
+
+        #region Properties
+
+        #region Animation Keys
+
+        private static readonly int GroundedKey = Animator.StringToHash("Grounded");
+        private static readonly int IdleSpeedKey = Animator.StringToHash("IdleSpeed");
+        private static readonly int JumpKey = Animator.StringToHash("Jump");
+
+        #endregion
+
+        #endregion
+
+        #region UnityInspector
+
         [SerializeField] private Animator _anim;
         [SerializeField] private AudioSource _source;
         [SerializeField] private LayerMask _groundMask;
@@ -20,11 +40,22 @@ namespace TarodevController {
         [SerializeField] private float _maxParticleFallSpeed = -40;
         [SerializeField] private Vector2 _crouchScaleModifier = new Vector2(1, 0.5f);
 
+        #region Extended
 
-        private IPlayerController _player;
-        private ParticleSystem.MinMaxGradient _currentGradient;
-        private Vector2 _movement;
-        private Vector2 _defaultSpriteSize;
+        [SerializeField] private SpriteRenderer _sprite;
+        [SerializeField] private ParticleSystem _doubleJumpParticles;
+        [SerializeField] private AudioClip _doubleJumpClip, _dashClip;
+        [SerializeField] private ParticleSystem _dashParticles, _dashRingParticles;
+        [SerializeField] private Transform _dashRingTransform;
+        [SerializeField] private AudioClip[] _slideClips;
+
+        #endregion
+
+        #endregion
+
+        #region Behaviour
+
+        #region Init
 
         void Awake() {
             _player = GetComponentInParent<IPlayerController>();
@@ -38,14 +69,7 @@ namespace TarodevController {
             _player.OnCrouchingChanged += OnCrouching;
         }
 
-
-        void OnDestroy() {
-            _player.OnGroundedChanged -= OnLanded;
-            _player.OnJumping -= OnJumping;
-            _player.OnDoubleJumping -= OnDoubleJumping;
-            _player.OnDashingChanged -= OnDashing;
-            _player.OnCrouchingChanged -= OnCrouching;
-        }
+        #endregion
 
         private void OnDoubleJumping() {
             _source.PlayOneShot(_doubleJumpClip);
@@ -63,17 +87,6 @@ namespace TarodevController {
                 _dashParticles.Stop();
             }
         }
-
-        #region Extended
-
-        [SerializeField] private SpriteRenderer _sprite;
-        [SerializeField] private ParticleSystem _doubleJumpParticles;
-        [SerializeField] private AudioClip _doubleJumpClip, _dashClip;
-        [SerializeField] private ParticleSystem _dashParticles, _dashRingParticles;
-        [SerializeField] private Transform _dashRingTransform;
-        [SerializeField] private AudioClip[] _slideClips;
-
-        #endregion
 
         private void OnJumping() {
             _anim.SetTrigger(JumpKey);
@@ -112,8 +125,26 @@ namespace TarodevController {
                 _sprite.size = _defaultSpriteSize;
             }
         }
+        void DetectGroundColor() 
+        {
+            // Detect ground color. Little bit of garbage allocation, but faster computationally.
+            var groundHits = Physics2D.RaycastAll(transform.position, Vector3.down, 2, _groundMask);
+            foreach (var hit in groundHits) {
+                if (!hit || hit.collider.isTrigger || !hit.transform.TryGetComponent(out SpriteRenderer r)) continue;
+                _currentGradient = new ParticleSystem.MinMaxGradient(r.color * 0.9f, r.color * 1.2f);
+                SetColor(_moveParticles);
+                return;
+            }
+        }
 
-        void Update() {
+
+        void SetColor(ParticleSystem ps) {
+            var main = ps.main;
+            main.startColor = _currentGradient;
+        }
+
+        void Update()
+        {
             if (_player == null) return;
 
             var inputPoint = Mathf.Abs(_player.Input.X);
@@ -134,18 +165,6 @@ namespace TarodevController {
 
             _movement = _player.RawMovement; // Previous frame movement is more valuable
         }
-
-        void DetectGroundColor() {
-            // Detect ground color. Little bit of garbage allocation, but faster computationally. Change to NonAlloc if you'd prefer
-            var groundHits = Physics2D.RaycastAll(transform.position, Vector3.down, 2, _groundMask);
-            foreach (var hit in groundHits) {
-                if (!hit || hit.collider.isTrigger || !hit.transform.TryGetComponent(out SpriteRenderer r)) continue;
-                _currentGradient = new ParticleSystem.MinMaxGradient(r.color * 0.9f, r.color * 1.2f);
-                SetColor(_moveParticles);
-                return;
-            }
-        }
-
         private void OnDisable() {
             _moveParticles.Stop();
         }
@@ -154,17 +173,14 @@ namespace TarodevController {
             _moveParticles.Play();
         }
 
-        void SetColor(ParticleSystem ps) {
-            var main = ps.main;
-            main.startColor = _currentGradient;
+        void OnDestroy()
+        {
+            _player.OnGroundedChanged -= OnLanded;
+            _player.OnJumping -= OnJumping;
+            _player.OnDoubleJumping -= OnDoubleJumping;
+            _player.OnDashingChanged -= OnDashing;
+            _player.OnCrouchingChanged -= OnCrouching;
         }
-
-
-        #region Animation Keys
-
-        private static readonly int GroundedKey = Animator.StringToHash("Grounded");
-        private static readonly int IdleSpeedKey = Animator.StringToHash("IdleSpeed");
-        private static readonly int JumpKey = Animator.StringToHash("Jump");
 
         #endregion
     }

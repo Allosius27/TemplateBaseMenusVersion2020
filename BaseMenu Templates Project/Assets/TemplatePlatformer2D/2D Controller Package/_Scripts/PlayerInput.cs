@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-namespace TarodevController {
+namespace Controller2D {
     public class PlayerInput : MonoBehaviour {
 #if (ENABLE_LEGACY_INPUT_MANAGER)
         public FrameInput GatherInput() {
@@ -11,6 +11,8 @@ namespace TarodevController {
                 JumpDown = Input.GetButtonDown("Jump"),
                 JumpHeld = Input.GetButton("Jump"),
                 DashDown = Input.GetButtonDown("Dash"),
+
+                WallGrabDown = Input.GetButtonDown("Climb"),
 
                 X = Input.GetAxisRaw("Horizontal"),
                 Y = Input.GetAxisRaw("Vertical")

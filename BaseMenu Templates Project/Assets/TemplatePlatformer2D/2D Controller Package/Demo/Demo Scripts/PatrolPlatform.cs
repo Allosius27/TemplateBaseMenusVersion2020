@@ -1,5 +1,5 @@
 using System;
-using TarodevController;
+using Controller2D;
 using UnityEngine;
 
 namespace Tarodev {

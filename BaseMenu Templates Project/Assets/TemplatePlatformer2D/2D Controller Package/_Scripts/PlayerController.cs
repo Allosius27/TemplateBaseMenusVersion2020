@@ -1,27 +1,13 @@
+using Sirenix.OdinInspector.Controller2D;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TarodevController {
-    /// <summary>
-    /// Hey!
-    /// Tarodev here. I built this controller as there was a severe lack of quality & free 2D controllers out there.
-    /// Right now it only contains movement and jumping, but it should be pretty easy to expand... I may even do it myself
-    /// if there's enough interest. You can play and compete for best times here: https://tarodev.itch.io/
-    /// If you hve any questions or would like to brag about your score, come to discord: https://discord.gg/GqeHHnhHpz
-    /// </summary>
+namespace Controller2D {
     [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D))]
-    public class PlayerController : MonoBehaviour, IPlayerController {
-        [SerializeField] private bool _allowDoubleJump, _allowDash, _allowCrouch;
-
-        // Public for external hooks
-        public FrameInput Input { get; private set; }
-        public Vector2 RawMovement { get; private set; }
-        public bool Grounded => _grounded;
-        public event Action<bool> OnGroundedChanged;
-        public event Action OnJumping, OnDoubleJumping;
-        public event Action<bool> OnDashingChanged;
-        public event Action<bool> OnCrouchingChanged;
+    public class PlayerController : MonoBehaviour, IPlayerController 
+    {
+        #region Fields
 
         private Rigidbody2D _rb;
         private BoxCollider2D _collider;
@@ -31,54 +17,29 @@ namespace TarodevController {
         private Vector2 _speed;
         private int _fixedFrame;
 
-        void Awake() {
-            _rb = GetComponent<Rigidbody2D>();
-            _collider = GetComponent<BoxCollider2D>();
-            _input = GetComponent<PlayerInput>();
+        private Vector2 _lastPos;
+        private bool _cornerStuck;
 
-            _defaultColliderSize = _collider.size;
-            _defaultColliderOffset = _collider.offset;
-        }
-
-        private void Update() => GatherInput();
-
-        void FixedUpdate() {
-            _fixedFrame++;
-            _frameClamp = _moveClamp;
-
-            // Calculate velocity
-            _velocity = (_rb.position - _lastPosition) / Time.fixedDeltaTime;
-            _lastPosition = _rb.position;
-
-            RunCollisionChecks();
-
-            CalculateCrouch();
-            CalculateHorizontal();
-            CalculateJumpApex();
-            CalculateGravity();
-            CalculateJump();
-            CalculateDash();
-            MoveCharacter();
-        }
-
-        #region Gather Input
-
-        private void GatherInput() {
-            Input = _input.GatherInput();
-
-            if (Input.DashDown) _dashToConsume = true;
-            if (Input.JumpDown) {
-                _lastJumpPressed = _fixedFrame;
-                _jumpToConsume = true;
+        private bool allowDoubleJump;
+        private bool _allowDoubleJump
+        {
+            get 
+            {
+                if (playerData != null)
+                {
+                    allowDoubleJump = playerData._allowDoubleJump;
+                    return playerData._allowDoubleJump;
+                }
+                else
+                {
+                    allowDoubleJump = false;
+                    return false;
+                }
             }
         }
 
-        #endregion
+        #region CollisionsVariables
 
-        #region Collisions
-
-        [Header("COLLISION")] [SerializeField] private LayerMask _groundLayer;
-        [SerializeField] private float _detectionRayLength = 0.1f;
         private RaycastHit2D[] _hitsDown = new RaycastHit2D[3];
         private RaycastHit2D[] _hitsUp = new RaycastHit2D[1];
         private RaycastHit2D[] _hitsLeft = new RaycastHit2D[1];
@@ -87,6 +48,286 @@ namespace TarodevController {
         private bool _hittingCeiling, _grounded, _colRight, _colLeft;
 
         private float _timeLeftGrounded;
+
+        #endregion
+
+        #region CrouchVariables
+
+        private Vector2 _defaultColliderSize, _defaultColliderOffset;
+        private float _velocityOnCrouch;
+        private bool _crouching;
+        private int _frameStartedCrouching;
+
+        #endregion
+
+        #region HorizontalMovementsVariables
+
+        private float _frameClamp;
+
+        #endregion
+
+        #region GravityVariables
+
+        private float _fallSpeed;
+
+        #endregion
+
+        #region JumpVariables
+
+        private bool _jumpToConsume;
+        private bool _coyoteUsable;
+        private bool _executedBufferedJump;
+        private bool _endedJumpEarly = true;
+        private float _apexPoint; // Becomes 1 at the apex of a jump
+        private float _lastJumpPressed = float.MinValue;
+        private bool _doubleJumpUsable;
+
+        private int coyoteTimeThreshold;
+        private int _coyoteTimeThreshold
+        {
+            get 
+            {
+                if (playerData != null)
+                {
+                    coyoteTimeThreshold = playerData._coyoteTimeThreshold;
+                    return playerData._coyoteTimeThreshold;
+                }
+                else
+                {
+                    coyoteTimeThreshold = 0;
+                    return 0;
+                }
+            }
+        }
+
+        private int jumpBuffer;
+        private int _jumpBuffer
+        {
+            get
+            {
+                if (playerData != null)
+                {
+                    jumpBuffer = playerData._jumpBuffer;
+                    return playerData._jumpBuffer;
+                }
+                else
+                {
+                    jumpBuffer = 0;
+                    return 0;
+                }
+            }
+        }
+
+        private float jumpEndEarlyGravityModifier;
+        private float _jumpEndEarlyGravityModifier
+        {
+            get
+            {
+                if (playerData != null)
+                {
+                    jumpEndEarlyGravityModifier = playerData._jumpEndEarlyGravityModifier;
+                    return playerData._jumpEndEarlyGravityModifier;
+                }
+                else
+                {
+                    jumpEndEarlyGravityModifier = 0.0f;
+                    return 0.0f;
+                }
+            }
+        }
+
+        #endregion
+
+        #region ClimbVariables
+
+        private bool wallGrab;
+
+        #endregion
+
+        #region DashVariables
+
+        private float _startedDashing;
+        private bool _canDash;
+        private Vector2 _dashVel;
+
+        private bool _dashing;
+        private bool _dashToConsume;
+
+        #endregion
+
+        #region Effectors & Forces Variables
+
+        private readonly List<IPlayerEffector> _usedEffectors = new List<IPlayerEffector>();
+
+        private Vector2 _forceBuildup;
+
+        #endregion
+
+        #endregion
+
+        #region Properties
+
+        public FrameInput Input { get; protected set; }
+        public Vector2 RawMovement { get; protected set; }
+        public bool Grounded => _grounded;
+
+        #region JumpVariables
+
+        private bool CanUseCoyote => _coyoteUsable && !_grounded && _timeLeftGrounded + _coyoteTimeThreshold > _fixedFrame;
+        private bool HasBufferedJump => ((_grounded && !_executedBufferedJump) || _cornerStuck) && _lastJumpPressed + _jumpBuffer > _fixedFrame;
+        private bool CanDoubleJump => _allowDoubleJump && _doubleJumpUsable && !_coyoteUsable;
+
+        #endregion
+
+        #endregion
+
+        #region Events
+
+        public event Action<bool> OnGroundedChanged;
+        public event Action OnJumping, OnDoubleJumping;
+        public event Action<bool> OnDashingChanged;
+        public event Action<bool> OnCrouchingChanged;
+
+        #endregion
+
+        #region UnityInspector
+
+        [SerializeField] private PlayerData playerData;
+
+        #endregion
+
+        #region Behaviour
+
+        #region Init
+
+        void Awake() 
+        {
+            _rb = GetComponent<Rigidbody2D>();
+            _collider = GetComponent<BoxCollider2D>();
+            _input = GetComponent<PlayerInput>();
+
+            LoadPlayerData();
+
+           
+
+            _defaultColliderSize = _collider.size;
+            _defaultColliderOffset = _collider.offset;
+        }
+
+        public void LoadPlayerData()
+        {
+            if(playerData != null)
+            {
+                
+            }
+            else
+            {
+                Debug.LogWarning("Player Data is null");
+            }
+        }
+
+        #endregion
+
+        #region Update
+
+        private void Update()
+        {
+            if(playerData == null)
+            {
+                return;
+            }
+
+            UpdateDebugVariables();
+
+            GatherInput();
+        }
+
+        void FixedUpdate() 
+        {
+            if(playerData == null)
+            {
+                return;
+            }
+
+            _fixedFrame++;
+            _frameClamp = playerData._moveClamp;
+
+            // Calculate velocity
+            _velocity = (_rb.position - _lastPosition) / Time.fixedDeltaTime;
+            _lastPosition = _rb.position;
+
+            RunCollisionChecks();
+
+            WallGrabCollisionChecks();
+
+            CalculateCrouch();
+            CalculateHorizontal();
+            
+            CalculateJumpApex();
+            CalculateGravity();
+            CalculateJump();
+            CalculateDash();
+            CalculateClimb();
+
+            MoveCharacter();
+        }
+
+        void UpdateDebugVariables()
+        {
+            if (coyoteTimeThreshold != _coyoteTimeThreshold)
+            {
+                coyoteTimeThreshold = _coyoteTimeThreshold;
+            }
+
+            if (jumpBuffer != _jumpBuffer)
+            {
+                jumpBuffer = _jumpBuffer;
+            }
+
+            if (jumpEndEarlyGravityModifier != _jumpEndEarlyGravityModifier)
+            {
+                jumpEndEarlyGravityModifier = _jumpEndEarlyGravityModifier;
+            }
+        }
+
+        #endregion
+
+        #region Gather Input
+
+        private void GatherInput() 
+        {
+            Debug.Log("GatherInput");
+
+            Input = _input.GatherInput();
+
+            if (Input.DashDown) _dashToConsume = true;
+            if (Input.JumpDown) {
+                _lastJumpPressed = _fixedFrame;
+                _jumpToConsume = true;
+                wallGrab = false;
+            }
+
+            if(Input.WallGrabDown && (_colRight || _colLeft))
+            {
+                wallGrab = !wallGrab;
+                if(wallGrab)
+                {
+                    _speed.y = 0;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Collisions
+
+        private void WallGrabCollisionChecks()
+        {
+            if(_colRight == false && _colLeft == false)
+            {
+                wallGrab = false;
+            }
+        }
 
 
         // We use these raycast checks for pre-collision information
@@ -120,7 +361,7 @@ namespace TarodevController {
                 // Physics2D.BoxCastNonAlloc(b.center, b.size, 0, dir, hits, _detectionRayLength, _groundLayer);
 
                 // This produces garbage, but is significantly more performant. Also less buggy.
-                hits = Physics2D.BoxCastAll(b.center, b.size, 0, dir, _detectionRayLength, _groundLayer);
+                hits = Physics2D.BoxCastAll(b.center, b.size, 0, dir, playerData._detectionRayLength, playerData._groundLayer);
 
                 foreach (var hit in hits)
                     if (hit.collider && !hit.collider.isTrigger)
@@ -129,59 +370,45 @@ namespace TarodevController {
             }
         }
 
-        private void OnDrawGizmos() {
-            if (!_collider) _collider = GetComponent<BoxCollider2D>();
-
-            Gizmos.color = Color.blue;
-            var b = _collider.bounds;
-            b.Expand(_detectionRayLength);
-
-            Gizmos.DrawWireCube(b.center, b.size);
-        }
-
         #endregion
 
         #region Crouch
 
-        [SerializeField, Header("CROUCH")] private float _crouchSizeModifier = 0.5f;
-        [SerializeField] private float _crouchSpeedModifier = 0.1f;
-        [SerializeField] private int _crouchSlowdownFrames = 50;
-        [SerializeField] private float _immediateCrouchSlowdownThreshold = 0.1f;
-        private Vector2 _defaultColliderSize, _defaultColliderOffset;
-        private float _velocityOnCrouch;
-        private bool _crouching;
-        private int _frameStartedCrouching;
-
-        private bool CanStand {
-            get {
-                var col = Physics2D.OverlapBox((Vector2)transform.position + _defaultColliderOffset, _defaultColliderSize * 0.95f, 0, _groundLayer);
+        private bool CanStand 
+        {
+            get 
+            {
+                var col = Physics2D.OverlapBox((Vector2)transform.position + _defaultColliderOffset, _defaultColliderSize * 0.95f, 0, playerData._groundLayer);
                 return (col == null || col.isTrigger);
             }
         }
 
-        void CalculateCrouch() {
-            if (!_allowCrouch) return;
+        void CalculateCrouch() 
+        {
+            if (!playerData._allowCrouch) return;
 
-
-            if (_crouching) {
-                var immediate = _velocityOnCrouch <= _immediateCrouchSlowdownThreshold ? _crouchSlowdownFrames : 0;
-                var crouchPoint = Mathf.InverseLerp(0, _crouchSlowdownFrames, _fixedFrame - _frameStartedCrouching + immediate);
-                _frameClamp *= Mathf.Lerp(1, _crouchSpeedModifier, crouchPoint);
+            if (_crouching) 
+            {
+                var immediate = _velocityOnCrouch <= playerData._immediateCrouchSlowdownThreshold ? playerData._crouchSlowdownFrames : 0;
+                var crouchPoint = Mathf.InverseLerp(0, playerData._crouchSlowdownFrames, _fixedFrame - _frameStartedCrouching + immediate);
+                _frameClamp *= Mathf.Lerp(1, playerData._crouchSpeedModifier, crouchPoint);
             }
 
-            if (_grounded && Input.Y < 0 && !_crouching) {
+            if (_grounded && Input.Y < 0 && !_crouching && !wallGrab) 
+            {
                 _crouching = true;
                 OnCrouchingChanged?.Invoke(true);
                 _velocityOnCrouch = Mathf.Abs(_velocity.x);
                 _frameStartedCrouching = _fixedFrame;
 
-                _collider.size = _defaultColliderSize * new Vector2(1, _crouchSizeModifier);
+                _collider.size = _defaultColliderSize * new Vector2(1, playerData._crouchSizeModifier);
 
                 // Lower the collider by the difference extent
-                var difference = _defaultColliderSize.y - (_defaultColliderSize.y * _crouchSizeModifier);
+                var difference = _defaultColliderSize.y - (_defaultColliderSize.y * playerData._crouchSizeModifier);
                 _collider.offset = -new Vector2(0, difference * 0.5f);
             }
-            else if (!_grounded || (Input.Y >= 0 && _crouching)) {
+            else if (!_grounded || (Input.Y >= 0 && _crouching) || wallGrab) 
+            {
                 // Detect obstruction in standing area. Add a .1 y buffer to avoid the ground.
                 if (!CanStand) return;
 
@@ -195,33 +422,24 @@ namespace TarodevController {
 
         #endregion
 
-        #region Horizontal
-
-        [Header("WALKING")] [SerializeField] private float _acceleration = 120;
-        [SerializeField] private float _moveClamp = 13;
-        [SerializeField] private float _deceleration = 60f;
-        [SerializeField] private float _apexBonus = 100;
-
-        [SerializeField] private bool _allowCreeping;
-
-        private float _frameClamp;
+        #region HorizontalMovements
 
         private void CalculateHorizontal() {
             if (Input.X != 0) {
                 // Set horizontal move speed
-                if (_allowCreeping) _speed.x = Mathf.MoveTowards(_speed.x, _frameClamp * Input.X, _acceleration * Time.fixedDeltaTime);
-                else _speed.x += Input.X * _acceleration * Time.fixedDeltaTime;
+                if (playerData._allowCreeping) _speed.x = Mathf.MoveTowards(_speed.x, _frameClamp * Input.X, playerData._acceleration * Time.fixedDeltaTime);
+                else _speed.x += Input.X * playerData._acceleration * Time.fixedDeltaTime;
 
                 // Clamped by max frame movement
                 _speed.x = Mathf.Clamp(_speed.x, -_frameClamp, _frameClamp);
 
                 // Apply bonus at the apex of a jump
-                var apexBonus = Mathf.Sign(Input.X) * _apexBonus * _apexPoint;
+                var apexBonus = Mathf.Sign(Input.X) * playerData._apexBonus * _apexPoint;
                 _speed.x += apexBonus * Time.fixedDeltaTime;
             }
             else {
                 // No input. Let's slow the character down
-                _speed.x = Mathf.MoveTowards(_speed.x, 0, _deceleration * Time.fixedDeltaTime);
+                _speed.x = Mathf.MoveTowards(_speed.x, 0, playerData._deceleration * Time.fixedDeltaTime);
             }
 
             if (!_grounded && (_speed.x > 0 && _colRight || _speed.x < 0 && _colLeft)) {
@@ -232,20 +450,24 @@ namespace TarodevController {
 
         #endregion
 
+        #region VerticalMovements
+
+        private void CalculateVertical()
+        {
+
+        }
+
+        #endregion
+
         #region Gravity
 
-        [Header("GRAVITY")] [SerializeField] private float _fallClamp = -60f;
-        [SerializeField] private float _minFallSpeed = 80f;
-        [SerializeField] private float _maxFallSpeed = 160f;
-        [SerializeField, Range(0, -10)] private float _groundingForce = -1.5f;
-        private float _fallSpeed;
-        
         private void CalculateGravity() {
-            if (_grounded) {
+            if (_grounded) 
+            {
                 if (Input.X == 0)  return;
 
                 // Slopes
-                _speed.y = _groundingForce;
+                _speed.y = playerData._groundingForce;
                 foreach (var hit in _hitsDown) {
                     if (hit.collider.isTrigger) continue;
                     var slopePerp = Vector2.Perpendicular(hit.normal).normalized;
@@ -254,12 +476,13 @@ namespace TarodevController {
                     // This needs improvement. Prioritize front hit for smoother slope apex
                     if (slopeAngle != 0) {
                         _speed.y = _speed.x * -slopePerp.y;
-                        _speed.y += _groundingForce; // Honestly, this feels like cheating. I'll work on it
+                        _speed.y += playerData._groundingForce; // Honestly, this feels like cheating. I'll work on it
                         break;
                     }
                 }
             }
-            else {
+            else if (!wallGrab)
+            {
                 // Add downward force while ascending if we ended the jump early
                 var fallSpeed = _endedJumpEarly && _speed.y > 0 ? _fallSpeed * _jumpEndEarlyGravityModifier : _fallSpeed;
 
@@ -267,7 +490,7 @@ namespace TarodevController {
                 _speed.y -= fallSpeed * Time.fixedDeltaTime;
 
                 // Clamp
-                if (_speed.y < _fallClamp) _speed.y = _fallClamp;
+                if (_speed.y < playerData._fallClamp) _speed.y = playerData._fallClamp;
             }
         }
 
@@ -275,28 +498,11 @@ namespace TarodevController {
 
         #region Jump
 
-        [Header("JUMPING")] [SerializeField] private float _jumpHeight = 35;
-        [SerializeField] private float _jumpApexThreshold = 40f;
-        [SerializeField] private int _coyoteTimeThreshold = 7;
-        [SerializeField] private int _jumpBuffer = 7;
-        [SerializeField] private float _jumpEndEarlyGravityModifier = 3;
-        private bool _jumpToConsume;
-        private bool _coyoteUsable;
-        private bool _executedBufferedJump;
-        private bool _endedJumpEarly = true;
-        private float _apexPoint; // Becomes 1 at the apex of a jump
-        private float _lastJumpPressed = float.MinValue;
-        private bool _doubleJumpUsable;
-
-        private bool CanUseCoyote => _coyoteUsable && !_grounded && _timeLeftGrounded + _coyoteTimeThreshold > _fixedFrame;
-        private bool HasBufferedJump => ((_grounded && !_executedBufferedJump) || _cornerStuck) && _lastJumpPressed + _jumpBuffer > _fixedFrame;
-        private bool CanDoubleJump => _allowDoubleJump && _doubleJumpUsable && !_coyoteUsable;
-
         private void CalculateJumpApex() {
             if (!_grounded) {
                 // Gets stronger the closer to the top of the jump
-                _apexPoint = Mathf.InverseLerp(_jumpApexThreshold, 0, Mathf.Abs(_velocity.y));
-                _fallSpeed = Mathf.Lerp(_minFallSpeed, _maxFallSpeed, _apexPoint);
+                _apexPoint = Mathf.InverseLerp(playerData._jumpApexThreshold, 0, Mathf.Abs(_velocity.y));
+                _fallSpeed = Mathf.Lerp(playerData._minFallSpeed, playerData._maxFallSpeed, _apexPoint);
             }
             else {
                 _apexPoint = 0;
@@ -307,7 +513,7 @@ namespace TarodevController {
             if (_crouching && !CanStand) return;
 
             if (_jumpToConsume && CanDoubleJump) {
-                _speed.y = _jumpHeight;
+                _speed.y = playerData._jumpHeight;
                 _doubleJumpUsable = false;
                 _endedJumpEarly = false;
                 _jumpToConsume = false;
@@ -316,7 +522,7 @@ namespace TarodevController {
 
             // Jump if: grounded or within coyote threshold || sufficient jump buffer
             if ((_jumpToConsume && CanUseCoyote) || HasBufferedJump) {
-                _speed.y = _jumpHeight;
+                _speed.y = playerData._jumpHeight;
                 _endedJumpEarly = false;
                 _coyoteUsable = false;
                 _jumpToConsume = false;
@@ -335,22 +541,12 @@ namespace TarodevController {
 
         #region Dash
 
-        [Header("DASH")] [SerializeField] private float _dashPower = 30;
-        [SerializeField] private int _dashLength = 6;
-        [SerializeField] private float _dashEndHorizontalMultiplier = 0.25f;
-        private float _startedDashing;
-        private bool _canDash;
-        private Vector2 _dashVel;
-
-        private bool _dashing;
-        private bool _dashToConsume;
-
         void CalculateDash() {
-            if (!_allowDash) return;
+            if (!playerData._allowDash) return;
             if (_dashToConsume && _canDash && !_crouching) {
                 var vel = new Vector2(Input.X, _grounded && Input.Y < 0 ? 0 : Input.Y).normalized;
                 if (vel == Vector2.zero) return;
-                _dashVel = vel * _dashPower;
+                _dashVel = vel * playerData._dashPower;
                 _dashing = true;
                 OnDashingChanged?.Invoke(true);
                 _canDash = false;
@@ -364,11 +560,11 @@ namespace TarodevController {
                 _speed.x = _dashVel.x;
                 _speed.y = _dashVel.y;
                 // Cancel when the time is out or we've reached our max safety distance
-                if (_startedDashing + _dashLength < _fixedFrame) {
+                if (_startedDashing + playerData._dashLength < _fixedFrame) {
                     _dashing = false;
                     OnDashingChanged?.Invoke(false);
                     if (_speed.y > 0) _speed.y = 0;
-                    _speed.x *= _dashEndHorizontalMultiplier;
+                    _speed.x *= playerData._dashEndHorizontalMultiplier;
                     if (_grounded) _canDash = true;
                 }
             }
@@ -378,11 +574,20 @@ namespace TarodevController {
 
         #endregion
 
+        #region Climb
+
+        private void CalculateClimb()
+        {
+
+        }
+
+        #endregion
 
         #region Move
 
         // We cast our bounds before moving to avoid future collisions
-        private void MoveCharacter() {
+        private void MoveCharacter() 
+        {
             RawMovement = _speed; // Used externally
             var move = RawMovement * Time.fixedDeltaTime;
 
@@ -391,15 +596,17 @@ namespace TarodevController {
 
             move += EvaluateForces();
 
+            if(wallGrab)
+            {
+                move.x = 0;
+            }
+
             _rb.MovePosition(_rb.position + move);
 
             RunCornerPrevention();
         }
 
         #region Corner Stuck Prevention
-
-        private Vector2 _lastPos;
-        private bool _cornerStuck;
 
         // This is a little hacky, but it's very difficult to fix.
         // This will allow walking and jumping while right on the corner of a ledge.
@@ -419,12 +626,7 @@ namespace TarodevController {
 
         #region Effectors & Forces
 
-        private readonly List<IPlayerEffector> _usedEffectors = new List<IPlayerEffector>();
-
-        /// <summary>
-        /// For more passive force effects like moving platforms, underwater etc
-        /// </summary>
-        /// <returns></returns>
+        /// For more passive force effects like moving platforms, underwater etc...
         private Vector2 EvaluateEffectors() {
             var effectorDirection = Vector2.zero;
             // Repeat this for other directions and possibly even area effectors. Wind zones, underwater etc
@@ -446,9 +648,6 @@ namespace TarodevController {
                 return Vector2.zero;
             }
         }
-
-        [Header("EFFECTORS")] [SerializeField] private float _forceDecay = 1;
-        private Vector2 _forceBuildup;
 
         public void AddForce(Vector2 force, PlayerForce mode = PlayerForce.Burst, bool cancelMovement = true) {
             if (cancelMovement) _speed = Vector2.zero;
@@ -472,9 +671,32 @@ namespace TarodevController {
 
             var force = _forceBuildup;
 
-            _forceBuildup = Vector2.MoveTowards(_forceBuildup, Vector2.zero, _forceDecay * Time.fixedDeltaTime);
+            _forceBuildup = Vector2.MoveTowards(_forceBuildup, Vector2.zero, playerData._forceDecay * Time.fixedDeltaTime);
 
             return force;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Gizmos
+
+        private void OnDrawGizmos()
+        {
+            if (!_collider) _collider = GetComponent<BoxCollider2D>();
+
+            Gizmos.color = Color.blue;
+
+            if(playerData != null)
+            {
+                var b = _collider.bounds;
+                b.Expand(playerData._detectionRayLength);
+
+                Gizmos.DrawWireCube(b.center, b.size);
+
+            }
+
         }
 
         #endregion

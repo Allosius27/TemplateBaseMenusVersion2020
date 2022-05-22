@@ -1,12 +1,15 @@
 using System;
 using UnityEngine;
 
-namespace TarodevController {
+namespace Controller2D {
     public struct FrameInput {
         public float X, Y;
+
         public bool JumpDown;
         public bool JumpHeld;
         public bool DashDown;
+
+        public bool WallGrabDown;
     }
 
     public interface IPlayerController {

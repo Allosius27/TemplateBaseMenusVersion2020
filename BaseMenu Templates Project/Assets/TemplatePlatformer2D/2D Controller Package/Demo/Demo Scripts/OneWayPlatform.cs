@@ -1,6 +1,6 @@
 using System;
 using JetBrains.Annotations;
-using TarodevController;
+using Controller2D;
 using UnityEngine;
 
 namespace Tarodev {
