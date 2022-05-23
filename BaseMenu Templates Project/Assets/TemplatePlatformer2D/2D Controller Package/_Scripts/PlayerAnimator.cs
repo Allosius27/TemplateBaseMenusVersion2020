@@ -67,6 +67,7 @@ namespace Controller2D
             _player.OnDoubleJumping += OnDoubleJumping;
             _player.OnDashingChanged += OnDashing;
             _player.OnCrouchingChanged += OnCrouching;
+            _player.OnWalking += OnWalking;
         }
 
         #endregion
@@ -85,6 +86,18 @@ namespace Controller2D
             }
             else {
                 _dashParticles.Stop();
+            }
+        }
+
+        private void OnWalking()
+        {
+            if(_player.MoveApplyValue.x != 0)
+            {
+                _anim.SetBool("Walking", true);
+            }
+            else
+            {
+                _anim.SetBool("Walking", false);
             }
         }
 
@@ -180,6 +193,7 @@ namespace Controller2D
             _player.OnDoubleJumping -= OnDoubleJumping;
             _player.OnDashingChanged -= OnDashing;
             _player.OnCrouchingChanged -= OnCrouching;
+            _player.OnWalking -= OnWalking;
         }
 
         #endregion

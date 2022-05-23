@@ -169,6 +169,7 @@ namespace Controller2D {
 
         public FrameInput Input { get; protected set; }
         public Vector2 RawMovement { get; protected set; }
+        public Vector2 MoveApplyValue { get; protected set; }
         public bool Grounded => _grounded;
 
         #region JumpVariables
@@ -187,6 +188,7 @@ namespace Controller2D {
         public event Action OnJumping, OnDoubleJumping;
         public event Action<bool> OnDashingChanged;
         public event Action<bool> OnCrouchingChanged;
+        public event Action OnWalking;
 
         #endregion
 
@@ -382,6 +384,7 @@ namespace Controller2D {
                 return (col == null || col.isTrigger);
             }
         }
+
 
         void CalculateCrouch() 
         {
@@ -601,7 +604,11 @@ namespace Controller2D {
                 move.x = 0;
             }
 
+            MoveApplyValue = move;
+
             _rb.MovePosition(_rb.position + move);
+            OnWalking?.Invoke();
+
 
             RunCornerPrevention();
         }
