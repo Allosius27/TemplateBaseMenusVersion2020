@@ -16,13 +16,17 @@ namespace Controller2D {
         public FrameInput Input { get; }
         public Vector2 RawMovement { get; }
         public Vector2 MoveApplyValue { get; }
+
         public bool Grounded { get; }
+        public bool WallGrab { get; }
 
         public event Action<bool> OnGroundedChanged;
         public event Action OnJumping, OnDoubleJumping;
         public event Action OnWalking;
         public event Action<bool> OnDashingChanged;
         public event Action<bool> OnCrouchingChanged;
+        public event Action OnClimbing;
+        public event Action OnWallGrab;
 
         /// <summary>
         /// Add force to the character

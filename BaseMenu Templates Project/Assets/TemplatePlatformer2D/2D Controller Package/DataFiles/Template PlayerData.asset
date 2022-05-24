@@ -21,11 +21,11 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  Visual: {fileID: 0}
+  Visual: {fileID: 8931638541987077541, guid: 0636a03283e23f149bc24c09911d2284, type: 3}
   Name: Player
   _allowDoubleJump: 0
-  _allowDash: 1
-  _allowCrouch: 1
+  _allowDash: 0
+  _allowCrouch: 0
   _acceleration: 120
   _moveClamp: 14
   _deceleration: 60

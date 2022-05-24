@@ -171,6 +171,7 @@ namespace Controller2D {
         public Vector2 RawMovement { get; protected set; }
         public Vector2 MoveApplyValue { get; protected set; }
         public bool Grounded => _grounded;
+        public bool WallGrab => wallGrab;
 
         #region JumpVariables
 
@@ -189,6 +190,8 @@ namespace Controller2D {
         public event Action<bool> OnDashingChanged;
         public event Action<bool> OnCrouchingChanged;
         public event Action OnWalking;
+        public event Action OnClimbing;
+        public event Action OnWallGrab;
 
         #endregion
 
@@ -312,10 +315,12 @@ namespace Controller2D {
             if(Input.WallGrabDown && (_colRight || _colLeft))
             {
                 wallGrab = !wallGrab;
-                if(wallGrab)
+                if (wallGrab)
                 {
+                    OnClimbing.Invoke();
                     _speed.y = 0;
                 }
+                OnWallGrab.Invoke();
             }
         }
 
@@ -328,6 +333,7 @@ namespace Controller2D {
             if(_colRight == false && _colLeft == false)
             {
                 wallGrab = false;
+                OnWallGrab.Invoke();
             }
         }
 
@@ -384,7 +390,6 @@ namespace Controller2D {
                 return (col == null || col.isTrigger);
             }
         }
-
 
         void CalculateCrouch() 
         {

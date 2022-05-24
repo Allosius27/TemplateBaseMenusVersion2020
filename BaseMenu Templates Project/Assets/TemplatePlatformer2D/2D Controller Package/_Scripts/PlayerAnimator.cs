@@ -19,6 +19,8 @@ namespace Controller2D
         #region Animation Keys
 
         private static readonly int GroundedKey = Animator.StringToHash("Grounded");
+        private static readonly int WallGrabKey = Animator.StringToHash("WallGrab");
+        private static readonly int ClimbKey = Animator.StringToHash("Climb");
         private static readonly int IdleSpeedKey = Animator.StringToHash("IdleSpeed");
         private static readonly int JumpKey = Animator.StringToHash("Jump");
 
@@ -68,6 +70,8 @@ namespace Controller2D
             _player.OnDashingChanged += OnDashing;
             _player.OnCrouchingChanged += OnCrouching;
             _player.OnWalking += OnWalking;
+            _player.OnClimbing += OnClimb;
+            _player.OnWallGrab += OnWallGrab;
         }
 
         #endregion
@@ -91,7 +95,7 @@ namespace Controller2D
 
         private void OnWalking()
         {
-            if(_player.MoveApplyValue.x != 0)
+            if(_player.MoveApplyValue.x != 0 && _player.Input.X != 0)
             {
                 _anim.SetBool("Walking", true);
             }
@@ -103,7 +107,7 @@ namespace Controller2D
 
         private void OnJumping() {
             _anim.SetTrigger(JumpKey);
-            _anim.ResetTrigger(GroundedKey);
+            //_anim.ResetTrigger(GroundedKey);
 
             // Only play particles when grounded (avoid coyote)
             if (_player.Grounded) {
@@ -113,10 +117,38 @@ namespace Controller2D
             }
         }
 
+        private void OnClimb()
+        {
+            _anim.SetTrigger(ClimbKey);
+        }
 
-        private void OnLanded(bool grounded) {
+        private void OnWallGrab()
+        {
+            _anim.SetBool(WallGrabKey, _player.WallGrab);
+
+            SpriteRenderer spriteRenderer = _anim.GetComponent<SpriteRenderer>();
+            if (_player.WallGrab)
+            {
+                if(spriteRenderer != null)
+                {
+                    spriteRenderer.flipX = true;
+                }
+            }
+            else
+            {
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.flipX = false;
+                }
+            }
+        }
+
+        private void OnLanded(bool grounded) 
+        {
+            _anim.SetBool(GroundedKey, grounded);
+
             if (grounded) {
-                _anim.SetTrigger(GroundedKey);
+                //_anim.SetTrigger(GroundedKey);
                 _source.PlayOneShot(_footsteps[Random.Range(0, _footsteps.Length)]);
                 _moveParticles.Play();
 
@@ -163,11 +195,15 @@ namespace Controller2D
             var inputPoint = Mathf.Abs(_player.Input.X);
 
             // Flip the sprite
-            if (_player.Input.X != 0) transform.localScale = new Vector3(_player.Input.X > 0 ? 1 : -1, 1, 1);
+            if (_player.Input.X != 0 && _player.WallGrab == false)
+            {
+                transform.localScale = new Vector3(_player.Input.X > 0 ? 1 : -1, 1, 1);
 
-            // Lean while running
-            var targetRotVector = new Vector3(0, 0, Mathf.Lerp(-_maxTilt, _maxTilt, Mathf.InverseLerp(-1, 1, _player.Input.X)));
-            _anim.transform.rotation = Quaternion.RotateTowards(_anim.transform.rotation, Quaternion.Euler(targetRotVector), _tiltSpeed * Time.deltaTime);
+                // Lean while running
+                var targetRotVector = new Vector3(0, 0, Mathf.Lerp(-_maxTilt, _maxTilt, Mathf.InverseLerp(-1, 1, _player.Input.X)));
+                _anim.transform.rotation = Quaternion.RotateTowards(_anim.transform.rotation, Quaternion.Euler(targetRotVector), _tiltSpeed * Time.deltaTime);
+            }
+
 
             // Speed up idle while running
             _anim.SetFloat(IdleSpeedKey, Mathf.Lerp(1, _maxIdleSpeed, inputPoint));
@@ -194,6 +230,8 @@ namespace Controller2D
             _player.OnDashingChanged -= OnDashing;
             _player.OnCrouchingChanged -= OnCrouching;
             _player.OnWalking -= OnWalking;
+            _player.OnClimbing -= OnClimb;
+            _player.OnWallGrab -= OnWallGrab;
         }
 
         #endregion
