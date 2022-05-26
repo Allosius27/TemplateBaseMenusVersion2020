@@ -1,5 +1,6 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
+using AllosiusDev;
 
 namespace Controller2D 
 {
@@ -20,7 +21,8 @@ namespace Controller2D
 
         private static readonly int GroundedKey = Animator.StringToHash("Grounded");
         private static readonly int WallGrabKey = Animator.StringToHash("WallGrab");
-        private static readonly int ClimbKey = Animator.StringToHash("Climb");
+        private static readonly int GrabKey = Animator.StringToHash("Grab");
+        private static readonly int WallClimbKey = Animator.StringToHash("WallClimb");
         private static readonly int IdleSpeedKey = Animator.StringToHash("IdleSpeed");
         private static readonly int JumpKey = Animator.StringToHash("Jump");
 
@@ -30,23 +32,36 @@ namespace Controller2D
 
         #region UnityInspector
 
+        [Header("Components")]
         [SerializeField] private Animator _anim;
         [SerializeField] private AudioSource _source;
         [SerializeField] private LayerMask _groundMask;
-        [SerializeField] private ParticleSystem _jumpParticles, _launchParticles;
-        [SerializeField] private ParticleSystem _moveParticles, _landParticles;
-        [SerializeField] private AudioClip[] _footsteps;
+
+        [Header("Jump")]
+        [SerializeField] private ParticleSystem _jumpParticles;
+        [SerializeField] private ParticleSystem _launchParticles;
+
+        [Header("Movements")]
+        [SerializeField] private ParticleSystem _moveParticles;
+        [SerializeField] private ParticleSystem _landParticles;
+        [SerializeField] private AudioData[] _footsteps;
         [SerializeField] private float _maxTilt = 5;
         [SerializeField] private float _tiltSpeed = 30;
         [SerializeField, Range(1f, 3f)] private float _maxIdleSpeed = 2;
         [SerializeField] private float _maxParticleFallSpeed = -40;
+
+        [Header("Crouch")]
         [SerializeField] private Vector2 _crouchScaleModifier = new Vector2(1, 0.5f);
+
+        [Header("Climb")]
+        [SerializeField] private bool _flipSpriteAtClimb = true;
 
         #region Extended
 
+        [Header("Extended")]
         [SerializeField] private SpriteRenderer _sprite;
         [SerializeField] private ParticleSystem _doubleJumpParticles;
-        [SerializeField] private AudioClip _doubleJumpClip, _dashClip;
+        [SerializeField] private AudioData _doubleJumpClip, _dashClip;
         [SerializeField] private ParticleSystem _dashParticles, _dashRingParticles;
         [SerializeField] private Transform _dashRingTransform;
         [SerializeField] private AudioClip[] _slideClips;
@@ -70,14 +85,16 @@ namespace Controller2D
             _player.OnDashingChanged += OnDashing;
             _player.OnCrouchingChanged += OnCrouching;
             _player.OnWalking += OnWalking;
-            _player.OnClimbing += OnClimb;
+            _player.OnGrab += OnGrab;
             _player.OnWallGrab += OnWallGrab;
+            _player.OnClimbing += OnWallClimb;
         }
 
         #endregion
 
         private void OnDoubleJumping() {
-            _source.PlayOneShot(_doubleJumpClip);
+            //_source.PlayOneShot(_doubleJumpClip);
+            AudioManager.Play(_doubleJumpClip.sound);
             _doubleJumpParticles.Play();
         }
 
@@ -86,7 +103,8 @@ namespace Controller2D
                 _dashParticles.Play();
                 _dashRingTransform.up = new Vector3(_player.Input.X, _player.Input.Y);
                 _dashRingParticles.Play();
-                _source.PlayOneShot(_dashClip);
+                //_source.PlayOneShot(_dashClip);
+                AudioManager.Play(_dashClip.sound);
             }
             else {
                 _dashParticles.Stop();
@@ -117,29 +135,44 @@ namespace Controller2D
             }
         }
 
-        private void OnClimb()
+        private void OnGrab()
         {
-            _anim.SetTrigger(ClimbKey);
+            _anim.SetTrigger(GrabKey);
         }
 
         private void OnWallGrab()
         {
             _anim.SetBool(WallGrabKey, _player.WallGrab);
 
-            SpriteRenderer spriteRenderer = _anim.GetComponent<SpriteRenderer>();
-            if (_player.WallGrab)
+            if (_flipSpriteAtClimb)
             {
-                if(spriteRenderer != null)
+                SpriteRenderer spriteRenderer = _anim.GetComponent<SpriteRenderer>();
+                if (_player.WallGrab)
                 {
-                    spriteRenderer.flipX = true;
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.flipX = true;
+                    }
                 }
+                else
+                {
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.flipX = false;
+                    }
+                }
+            }
+        }
+
+        private void OnWallClimb()
+        {
+            if (_player.WallGrab && _player.Input.Y != 0)
+            {
+                _anim.SetBool(WallClimbKey, true);
             }
             else
             {
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.flipX = false;
-                }
+                _anim.SetBool(WallClimbKey, false);
             }
         }
 
@@ -149,7 +182,8 @@ namespace Controller2D
 
             if (grounded) {
                 //_anim.SetTrigger(GroundedKey);
-                _source.PlayOneShot(_footsteps[Random.Range(0, _footsteps.Length)]);
+                //_source.PlayOneShot(_footsteps[Random.Range(0, _footsteps.Length)]);
+                AudioManager.Play(_footsteps[Random.Range(0, _footsteps.Length)].sound);
                 _moveParticles.Play();
 
                 _landParticles.transform.localScale = Vector3.one * Mathf.InverseLerp(0, _maxParticleFallSpeed, _movement.y);
@@ -170,6 +204,7 @@ namespace Controller2D
                 _sprite.size = _defaultSpriteSize;
             }
         }
+
         void DetectGroundColor() 
         {
             // Detect ground color. Little bit of garbage allocation, but faster computationally.
@@ -204,7 +239,6 @@ namespace Controller2D
                 _anim.transform.rotation = Quaternion.RotateTowards(_anim.transform.rotation, Quaternion.Euler(targetRotVector), _tiltSpeed * Time.deltaTime);
             }
 
-
             // Speed up idle while running
             _anim.SetFloat(IdleSpeedKey, Mathf.Lerp(1, _maxIdleSpeed, inputPoint));
 
@@ -230,8 +264,9 @@ namespace Controller2D
             _player.OnDashingChanged -= OnDashing;
             _player.OnCrouchingChanged -= OnCrouching;
             _player.OnWalking -= OnWalking;
-            _player.OnClimbing -= OnClimb;
+            _player.OnGrab -= OnGrab;
             _player.OnWallGrab -= OnWallGrab;
+            _player.OnClimbing -= OnWallClimb;
         }
 
         #endregion

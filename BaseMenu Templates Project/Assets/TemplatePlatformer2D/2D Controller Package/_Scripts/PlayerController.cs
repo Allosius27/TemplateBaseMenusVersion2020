@@ -47,6 +47,9 @@ namespace Controller2D {
 
         private bool _hittingCeiling, _grounded, _colRight, _colLeft;
 
+        private bool onClimbWall;
+        private bool onClimbWallOffset;
+
         private float _timeLeftGrounded;
 
         #endregion
@@ -170,6 +173,9 @@ namespace Controller2D {
         public FrameInput Input { get; protected set; }
         public Vector2 RawMovement { get; protected set; }
         public Vector2 MoveApplyValue { get; protected set; }
+
+        public bool IsTurned { get; protected set; }
+
         public bool Grounded => _grounded;
         public bool WallGrab => wallGrab;
 
@@ -190,8 +196,9 @@ namespace Controller2D {
         public event Action<bool> OnDashingChanged;
         public event Action<bool> OnCrouchingChanged;
         public event Action OnWalking;
-        public event Action OnClimbing;
+        public event Action OnGrab;
         public event Action OnWallGrab;
+        public event Action OnClimbing;
 
         #endregion
 
@@ -261,11 +268,13 @@ namespace Controller2D {
             _velocity = (_rb.position - _lastPosition) / Time.fixedDeltaTime;
             _lastPosition = _rb.position;
 
+            
             RunCollisionChecks();
 
             WallGrabCollisionChecks();
 
             CalculateCrouch();
+
             CalculateHorizontal();
             
             CalculateJumpApex();
@@ -309,17 +318,19 @@ namespace Controller2D {
             if (Input.JumpDown) {
                 _lastJumpPressed = _fixedFrame;
                 _jumpToConsume = true;
+                
                 wallGrab = false;
+                OnWallGrab.Invoke();
             }
 
-            if(Input.WallGrabDown && (_colRight || _colLeft))
+            if(Input.WallGrabDown && onClimbWall)
             {
                 wallGrab = !wallGrab;
                 if (wallGrab)
                 {
-                    OnClimbing.Invoke();
-                    _speed.y = 0;
+                    OnGrab.Invoke();
                 }
+                _speed.y = 0;
                 OnWallGrab.Invoke();
             }
         }
@@ -328,15 +339,56 @@ namespace Controller2D {
 
         #region Collisions
 
+        private void SetFlip()
+        {
+            if (Input.X > 0)
+            {
+                IsTurned = false;
+            }
+            else if(Input.X < 0)
+            {
+                IsTurned = true;
+            }
+        }
+
         private void WallGrabCollisionChecks()
         {
-            if(_colRight == false && _colLeft == false)
+            Vector2 currentSideOffset = SetSideOffset();
+
+            var hit = Physics2D.OverlapCircle((Vector2)transform.position + currentSideOffset, playerData.collisionRadius, playerData.ClimbLayerMask);
+            if (hit != null)
+            {
+                //Debug.Log(hit.name);
+                onClimbWall = true;
+            }
+            else
+            {
+                onClimbWall = false;
+            }
+
+            var hitOffset = Physics2D.OverlapCircle((Vector2)transform.position + currentSideOffset + playerData.aboveSideOffset, playerData.collisionRadius, playerData.ClimbLayerMask);
+            if (hitOffset != null)
+            {
+                //Debug.Log(hitOffset.name);
+                onClimbWallOffset = true;
+            }
+            else
+            {
+                onClimbWallOffset = false;
+            }
+
+            /*if (_colRight == false && _colLeft == false)
+            {
+                wallGrab = false;
+                OnWallGrab.Invoke();
+            }*/
+
+            if (onClimbWall == false)
             {
                 wallGrab = false;
                 OnWallGrab.Invoke();
             }
         }
-
 
         // We use these raycast checks for pre-collision information
         private void RunCollisionChecks() {
@@ -348,6 +400,7 @@ namespace Controller2D {
             _colLeft = RunDetection(Vector2.left, out _hitsLeft);
             _colRight = RunDetection(Vector2.right, out _hitsRight);
             _hittingCeiling = RunDetection(Vector2.up, out _hitsUp);
+
 
             if (_grounded && !groundedCheck) {
                 _timeLeftGrounded = _fixedFrame; // Only trigger when first leaving
@@ -364,7 +417,8 @@ namespace Controller2D {
 
             _grounded = groundedCheck;
 
-            bool RunDetection(Vector2 dir, out RaycastHit2D[] hits) {
+            bool RunDetection(Vector2 dir, out RaycastHit2D[] hits) 
+            {
                 // Array.Clear(hits, 0, hits.Length);
                 // Physics2D.BoxCastNonAlloc(b.center, b.size, 0, dir, hits, _detectionRayLength, _groundLayer);
 
@@ -376,6 +430,22 @@ namespace Controller2D {
                         return true;
                 return false;
             }
+        }
+
+        private Vector2 SetSideOffset()
+        {
+            Vector2 currentSideOffset = Vector2.zero;
+
+            if (IsTurned)
+            {
+                currentSideOffset = new Vector2(-playerData.sideOffset.x, playerData.sideOffset.y);
+            }
+            else
+            {
+                currentSideOffset = new Vector2(playerData.sideOffset.x, playerData.sideOffset.y);
+            }
+
+            return currentSideOffset;
         }
 
         #endregion
@@ -435,8 +505,8 @@ namespace Controller2D {
         private void CalculateHorizontal() {
             if (Input.X != 0) {
                 // Set horizontal move speed
-                if (playerData._allowCreeping) _speed.x = Mathf.MoveTowards(_speed.x, _frameClamp * Input.X, playerData._acceleration * Time.fixedDeltaTime);
-                else _speed.x += Input.X * playerData._acceleration * Time.fixedDeltaTime;
+                if (playerData._allowCreeping) _speed.x = Mathf.MoveTowards(_speed.x, _frameClamp * Input.X, playerData._horizontalAcceleration * Time.fixedDeltaTime);
+                else _speed.x += Input.X * playerData._horizontalAcceleration * Time.fixedDeltaTime;
 
                 // Clamped by max frame movement
                 _speed.x = Mathf.Clamp(_speed.x, -_frameClamp, _frameClamp);
@@ -447,7 +517,7 @@ namespace Controller2D {
             }
             else {
                 // No input. Let's slow the character down
-                _speed.x = Mathf.MoveTowards(_speed.x, 0, playerData._deceleration * Time.fixedDeltaTime);
+                _speed.x = Mathf.MoveTowards(_speed.x, 0, playerData._horizontalDeceleration * Time.fixedDeltaTime);
             }
 
             if (!_grounded && (_speed.x > 0 && _colRight || _speed.x < 0 && _colLeft)) {
@@ -462,7 +532,19 @@ namespace Controller2D {
 
         private void CalculateVertical()
         {
+            if (Input.Y != 0)
+            {
+                // Set vertical move speed
+                _speed.y += Input.Y * playerData._verticalAcceleration * Time.fixedDeltaTime;
 
+                // Clamped by max frame movement
+                _speed.y = Mathf.Clamp(_speed.y, -_frameClamp, _frameClamp);
+            }
+            else
+            {
+                // No input. Let's slow the character down
+                _speed.y = Mathf.MoveTowards(_speed.y, 0, playerData._horizontalDeceleration * Time.fixedDeltaTime);
+            }
         }
 
         #endregion
@@ -586,7 +668,12 @@ namespace Controller2D {
 
         private void CalculateClimb()
         {
+            if(wallGrab)
+            {
+                CalculateVertical();
 
+                OnClimbing.Invoke();
+            }
         }
 
         #endregion
@@ -607,6 +694,10 @@ namespace Controller2D {
             if(wallGrab)
             {
                 move.x = 0;
+            }
+            else
+            {
+                SetFlip();
             }
 
             MoveApplyValue = move;
@@ -707,6 +798,10 @@ namespace Controller2D {
 
                 Gizmos.DrawWireCube(b.center, b.size);
 
+                Gizmos.color = Color.red;
+                Vector2 currentSideOffset = SetSideOffset();
+                Gizmos.DrawWireSphere((Vector2)transform.position + currentSideOffset, playerData.collisionRadius);
+                Gizmos.DrawWireSphere((Vector2)transform.position + currentSideOffset + playerData.aboveSideOffset, playerData.collisionRadius);
             }
 
         }

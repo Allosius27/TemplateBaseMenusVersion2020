@@ -49,6 +49,7 @@ public class MainMenu : MonoBehaviour
     {
 
         SettingsMenu = UICanvasManager.Instance.SettingsMenu;
+        SettingsMenu.mainMenu = this;
 
         activesButtons = true;
 

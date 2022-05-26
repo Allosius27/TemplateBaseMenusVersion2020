@@ -17,6 +17,8 @@ namespace Controller2D {
         public Vector2 RawMovement { get; }
         public Vector2 MoveApplyValue { get; }
 
+        public bool IsTurned { get; }
+
         public bool Grounded { get; }
         public bool WallGrab { get; }
 
@@ -25,8 +27,9 @@ namespace Controller2D {
         public event Action OnWalking;
         public event Action<bool> OnDashingChanged;
         public event Action<bool> OnCrouchingChanged;
-        public event Action OnClimbing;
+        public event Action OnGrab;
         public event Action OnWallGrab;
+        public event Action OnClimbing;
 
         /// <summary>
         /// Add force to the character

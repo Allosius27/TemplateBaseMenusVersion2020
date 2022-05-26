@@ -13,14 +13,15 @@ namespace Sirenix.OdinInspector.Controller2D
         protected const string GENERAL_SETTINGS_VERTICAL_GROUP = "Split/Left/General Settings";
         protected const string CARACS_BOX_GROUP = "Split/Left/Basic Caracs";
         protected const string HORIZONTAL_MOVEMENTS_GROUP = "Split/Left/Walking";
+        protected const string VERTICAL_MOVEMENTS_GROUP = "Split/Left/Climb";
         protected const string JUMPING_GROUP = "Split/Left/Jumping";
-        protected const string DASH_GROUP = "Split/Left/Dash";
 
         protected const string RIGHT_VERTICAL_GROUP = "Split/Right";
         protected const string NOTES_GROUP = "Split/Right/Notes";
         protected const string COLLISIONS_GROUP = "Split/Right/Collisions";
         protected const string GRAVITY_GROUP = "Split/Right/Gravity";
         protected const string CROUCH_GROUP = "Split/Right/Crouch";
+        protected const string DASH_GROUP = "Split/Right/Dash";
         protected const string EFFECTORS_GROUP = "Split/Right/Effectors";
 
         #endregion
@@ -59,19 +60,36 @@ namespace Sirenix.OdinInspector.Controller2D
         #region HorizontalMovementsVariables
 
         [BoxGroup(HORIZONTAL_MOVEMENTS_GROUP)]
-        public float _acceleration = 120;
+        public float _horizontalAcceleration = 120;
 
         [BoxGroup(HORIZONTAL_MOVEMENTS_GROUP)]
         public float _moveClamp = 13;
 
         [BoxGroup(HORIZONTAL_MOVEMENTS_GROUP)]
-        public float _deceleration = 60f;
+        public float _horizontalDeceleration = 60f;
 
         [BoxGroup(HORIZONTAL_MOVEMENTS_GROUP)]
         public float _apexBonus = 100;
 
         [BoxGroup(HORIZONTAL_MOVEMENTS_GROUP)]
         public bool _allowCreeping;
+
+        #endregion
+
+        #region VerticalMovementsVariables
+
+        [BoxGroup(VERTICAL_MOVEMENTS_GROUP)]
+        public float _verticalAcceleration = 60;
+
+        [BoxGroup(VERTICAL_MOVEMENTS_GROUP)]
+        public float _verticalDeceleration = 30f;
+
+        #region ClimbVariables
+
+        [BoxGroup(VERTICAL_MOVEMENTS_GROUP)]
+        public LayerMask ClimbLayerMask;
+
+        #endregion
 
         #endregion
 
@@ -91,19 +109,6 @@ namespace Sirenix.OdinInspector.Controller2D
 
         [BoxGroup(JUMPING_GROUP)]
         public float _jumpEndEarlyGravityModifier = 3;
-
-        #endregion
-
-        #region DashVariables
-
-        [BoxGroup(DASH_GROUP)]
-        public float _dashPower = 30;
-
-        [BoxGroup(DASH_GROUP)]
-        public int _dashLength = 6;
-
-        [BoxGroup(DASH_GROUP)]
-        public float _dashEndHorizontalMultiplier = 0.25f;
 
         #endregion
 
@@ -130,6 +135,14 @@ namespace Sirenix.OdinInspector.Controller2D
         [BoxGroup(COLLISIONS_GROUP)]
         public float _detectionRayLength = 0.1f;
 
+        [BoxGroup(COLLISIONS_GROUP)]
+        public float collisionRadius;
+
+        [BoxGroup(COLLISIONS_GROUP)]
+        public Vector2 sideOffset;
+        [BoxGroup(COLLISIONS_GROUP)]
+        public Vector2 aboveSideOffset;
+
         #endregion
 
         #region GravityVariables
@@ -144,7 +157,7 @@ namespace Sirenix.OdinInspector.Controller2D
         public float _maxFallSpeed = 160f;
 
         [BoxGroup(GRAVITY_GROUP)]
-        [Range(0, -10)]
+        [ProgressBar(0, -10), ShowInInspector]
         public float _groundingForce = -1.5f;
 
         #endregion
@@ -162,6 +175,19 @@ namespace Sirenix.OdinInspector.Controller2D
 
         [BoxGroup(CROUCH_GROUP)]
         public float _immediateCrouchSlowdownThreshold = 0.1f;
+
+        #endregion
+
+        #region DashVariables
+
+        [BoxGroup(DASH_GROUP)]
+        public float _dashPower = 30;
+
+        [BoxGroup(DASH_GROUP)]
+        public int _dashLength = 6;
+
+        [BoxGroup(DASH_GROUP)]
+        public float _dashEndHorizontalMultiplier = 0.25f;
 
         #endregion
 

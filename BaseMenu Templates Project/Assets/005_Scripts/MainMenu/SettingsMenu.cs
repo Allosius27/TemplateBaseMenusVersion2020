@@ -9,8 +9,6 @@ public class SettingsMenu : MonoBehaviour
 {
     #region Fields
 
-    private MainMenu mainMenu;
-
     private Resolution[] resolutions;
     private List<Resolution> listRes = new List<Resolution>();
     private List<string> options = new List<string>();
@@ -18,6 +16,8 @@ public class SettingsMenu : MonoBehaviour
     #endregion
 
     #region Properties
+
+    public MainMenu mainMenu { get; set; }
 
     public bool windowControls { get; set; }
 
@@ -42,8 +42,6 @@ public class SettingsMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        mainMenu = FindObjectOfType<MainMenu>();
-
         resolutions = Screen.resolutions.Select(resolution => new Resolution { width = resolution.width, height = resolution.height }).Distinct().ToArray();
         //resolutions = Screen.resolutions;
         Debug.Log(resolutions.Length);
@@ -104,7 +102,7 @@ public class SettingsMenu : MonoBehaviour
             mainMenu.activeSettings = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetButtonDown("Escape") || Input.GetButtonDown("Return"))
         {
             ExitSettings();
         }
