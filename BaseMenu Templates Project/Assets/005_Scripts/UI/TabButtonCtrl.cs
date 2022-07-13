@@ -1,3 +1,4 @@
+using AllosiusDev.Audio;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +29,7 @@ public class TabButtonCtrl : ButtonCtrl
 
     public void ClickButton()
     {
-        AllosiusDev.AudioManager.Play(SfxButtonClickedObject.sound);
+        AudioController.Instance.PlayAudio(SfxButtonClickedObject);
 
         if (settingsMenu.CurrentActiveTabSettingMenu != null && settingsMenu.CurrentActiveTabSettingMenu != this)
         {

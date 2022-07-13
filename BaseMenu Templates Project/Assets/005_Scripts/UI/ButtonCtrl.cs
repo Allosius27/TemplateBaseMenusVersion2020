@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using AllosiusDev.Audio;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,22 +9,22 @@ public class ButtonCtrl : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
 {
     public Button button { get; protected set; }
 
-    public AllosiusDev.AudioData SfxButtonHighlightedObject => sfxButtonHighlightedObject;
-    public AllosiusDev.AudioData SfxButtonClickedObject => sfxButtonClickedObject;
+    public AudioData SfxButtonHighlightedObject => sfxButtonHighlightedObject;
+    public AudioData SfxButtonClickedObject => sfxButtonClickedObject;
 
-    [SerializeField] private AllosiusDev.AudioData sfxButtonHighlightedObject;
-    [SerializeField] private AllosiusDev.AudioData sfxButtonClickedObject;
+    [SerializeField] private AudioData sfxButtonHighlightedObject;
+    [SerializeField] private AudioData sfxButtonClickedObject;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         Debug.Log("Mouse enter");
-        AllosiusDev.AudioManager.Play(sfxButtonHighlightedObject.sound);
+        AudioController.Instance.PlayAudio(sfxButtonHighlightedObject);
     }
 
     public virtual void OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("Mouse Down");
-        AllosiusDev.AudioManager.Play(sfxButtonClickedObject.sound);
+        AudioController.Instance.PlayAudio(sfxButtonClickedObject);
     }
 
     public void OnPointerUp(PointerEventData eventData)

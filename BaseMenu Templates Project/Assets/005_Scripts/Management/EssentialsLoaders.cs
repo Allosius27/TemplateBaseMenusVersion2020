@@ -1,22 +1,33 @@
-﻿using System.Collections;
+﻿using AllosiusDev.Audio;
+using AllosiusDev.Core.Session;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class EssentialsLoaders : MonoBehaviour
 {
-    [SerializeField] private GameObject audioMan, langueMan, sceneLoader, uiCanvasManager;
+    [SerializeField] private AudioController audioController;
+    [SerializeField] private SessionController sessionController;
+    [SerializeField] private LangueManager langueManager;
+    [SerializeField] private SceneLoader sceneLoader;
+    [SerializeField] private UICanvasManager uiCanvasManager;
 
     private void Awake()
     {
-        if (AllosiusDev.AudioManager.Instance == null)
+        if (AudioController.Instance == null)
         {
-            Instantiate(audioMan);
+            Instantiate(audioController);
+        }
+
+        if(SessionController.Instance == null)
+        {
+            Instantiate(sessionController);
         }
 
         if (LangueManager.Instance == null)
         {
-            Instantiate(langueMan);
+            Instantiate(langueManager);
         }
 
         if(SceneLoader.Instance == null)

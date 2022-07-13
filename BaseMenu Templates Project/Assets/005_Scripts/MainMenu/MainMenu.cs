@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEditor;
+using AllosiusDev.Audio;
 
 public class MainMenu : MonoBehaviour
 {
@@ -40,20 +41,19 @@ public class MainMenu : MonoBehaviour
 
     [Space]
 
-    public AllosiusDev.AudioData mainMenuMusic;
+    public AudioData mainMenuMusic;
     #endregion
 
 
     // Start is called before the first frame update
     void Start()
     {
-
         SettingsMenu = UICanvasManager.Instance.SettingsMenu;
         SettingsMenu.mainMenu = this;
 
         activesButtons = true;
 
-        AllosiusDev.AudioManager.Play(mainMenuMusic.sound);
+        AudioController.Instance.PlayAudio(mainMenuMusic);
 
         Cursor.SetCursor(null, hotSpot, cursorMode);
 

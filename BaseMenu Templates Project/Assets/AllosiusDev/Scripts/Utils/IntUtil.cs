@@ -2,38 +2,41 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public static class IntUtil
+namespace AllosiusDev
 {
-    #region Fields
-
-    private static Random random;
-
-    #endregion
-
-    #region Behaviour
-
-    private static void Init()
+    public static class IntUtil
     {
-        if (random == null) random = new Random();
-    }
+        #region Fields
 
-    public static int Random(int min, int max)
-    {
-        Init();
-        return random.Next(min, max);
-    }
+        private static Random random;
 
-    public static List<T> RandomizeList<T>(List<T> list)
-    {
-        List<T> randomizedList = new List<T>(); 
-        while (list.Count > 0)
+        #endregion
+
+        #region Behaviour
+
+        private static void Init()
         {
-            int index = Random(0, list.Count); //pick a random item from the master list
-            randomizedList.Add(list[index]); //place it at the end of the randomized list
-            list.RemoveAt(index); 
-        } 
-        return randomizedList;
-    }
+            if (random == null) random = new Random();
+        }
 
-    #endregion
+        public static int Random(int min, int max)
+        {
+            Init();
+            return random.Next(min, max);
+        }
+
+        public static List<T> RandomizeList<T>(List<T> list)
+        {
+            List<T> randomizedList = new List<T>();
+            while (list.Count > 0)
+            {
+                int index = Random(0, list.Count); //pick a random item from the master list
+                randomizedList.Add(list[index]); //place it at the end of the randomized list
+                list.RemoveAt(index);
+            }
+            return randomizedList;
+        }
+
+        #endregion
+    }
 }

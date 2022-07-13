@@ -1,3 +1,4 @@
+using AllosiusDev.Core.Menu;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,8 @@ public class UICanvasManager : AllosiusDev.Singleton<UICanvasManager>
 
     public EventSystem EventSystem => eventSystem;
 
+    public PageController PageController => pageController;
+
     public SettingsMenu SettingsMenu => settingsMenu;
 
     public PauseMenu PauseMenu => pauseMenu;
@@ -24,6 +27,8 @@ public class UICanvasManager : AllosiusDev.Singleton<UICanvasManager>
     #region UnityInspector
 
     [SerializeField] private EventSystem eventSystem;
+
+    [SerializeField] private PageController pageController;
 
     [SerializeField] private SettingsMenu settingsMenu;
 

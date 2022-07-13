@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using AllosiusDev.Audio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace AllosiusDev
         public override IEnumerator Execute(GameObject _owner)
         {
             if(IsActive)
-                AudioManager.Play(audioData.sound);
+                AudioController.Instance.PlayAudio(audioData);
             return base.Execute(_owner);
         }
     }

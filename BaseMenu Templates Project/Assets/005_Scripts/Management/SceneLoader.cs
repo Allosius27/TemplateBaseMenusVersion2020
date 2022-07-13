@@ -2,6 +2,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using AllosiusDev.Audio;
 
 public class SceneLoader : AllosiusDev.Singleton<SceneLoader>
 {
@@ -47,7 +48,7 @@ public class SceneLoader : AllosiusDev.Singleton<SceneLoader>
     {
         yield return new WaitForSeconds(timeToWait);
 
-        AllosiusDev.AudioManager.StopAllAmbients();
+        AudioController.Instance.StopAllAmbients();
         Debug.Log("StopAllAmbients");
 
         AsyncOperation operation = SceneManager.LoadSceneAsync((int)(object)_sceneData.sceneToLoad);
@@ -63,7 +64,7 @@ public class SceneLoader : AllosiusDev.Singleton<SceneLoader>
             if (operation.progress >= 0.8f)
             {
                 Debug.Log("SceneChanged");
-                AllosiusDev.AudioManager.StopAllMusics();
+                AudioController.Instance.StopAllMusics();
                 operation.allowSceneActivation = false;
                 yield return new WaitForSeconds(3f);
                 operation.allowSceneActivation = true;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
+using AllosiusDev.Audio;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -89,7 +90,7 @@ public class PauseMenu : MonoBehaviour
     {
         canPause = false;
         Resume();
-        AllosiusDev.AudioManager.StopAllMusics();
+        AudioController.Instance.StopAllMusics();
         SceneLoader.Instance.ActiveLoadingScreen(mainMenuSceneData, 1.0f);
     }
 }

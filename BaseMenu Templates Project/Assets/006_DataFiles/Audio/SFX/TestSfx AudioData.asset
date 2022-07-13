@@ -16,9 +16,12 @@ MonoBehaviour:
     clip: {fileID: 0}
     parameters:
       typeSound: 0
-      volume: 0
-      volume3d: 0
-      pitch: 0
+      pitch: 0.1
       loop: 0
       priority: 128
+      parameters2d: 1
+      volume2d: 0.25
+      parameters3d: 1
+      volume3d: 0.25
       spacialBlend: 0
+      maxDistance: 500

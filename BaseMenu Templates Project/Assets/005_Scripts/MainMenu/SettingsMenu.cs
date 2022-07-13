@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using System.Linq;
+using AllosiusDev.Core.Menu;
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class SettingsMenu : MonoBehaviour
 
     [SerializeField] private Dropdown resolutionDropDown;
 
-    [SerializeField] private GameObject settings;
+    [SerializeField] private Page settings;
 
     [SerializeField] private Button[] tabButtonsCtrls;
     [SerializeField] private TabButtonCtrl currentActiveTabSettingMenu;
@@ -159,7 +160,8 @@ public class SettingsMenu : MonoBehaviour
 
     public void LaunchSettings()
     {
-        settings.SetActive(true);
+        //settings.SetActive(true);
+        UICanvasManager.Instance.PageController.TurnPageOn(settings);
         UICanvasManager.Instance.EventSystem.SetSelectedGameObject(currentActiveTabSettingMenu.gameObject);
     }
 
@@ -176,6 +178,7 @@ public class SettingsMenu : MonoBehaviour
             UICanvasManager.Instance.EventSystem.SetSelectedGameObject(UICanvasManager.Instance.PauseMenu.MenuButtons[0].gameObject);
         }
 
-        settings.SetActive(false);
+        //settings.SetActive(false);
+        UICanvasManager.Instance.PageController.TurnPageOff(settings);
     }
 }
