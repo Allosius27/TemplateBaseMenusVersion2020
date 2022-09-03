@@ -1,5 +1,6 @@
 ﻿using AllosiusDev.Audio;
-using AllosiusDev.Core.Session;
+using Core;
+using Core.Session;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class EssentialsLoaders : MonoBehaviour
     [SerializeField] private LangueManager langueManager;
     [SerializeField] private SceneLoader sceneLoader;
     [SerializeField] private UICanvasManager uiCanvasManager;
+
+    [SerializeField] private BaseGameController gameController;
 
     private void Awake()
     {
@@ -38,6 +41,12 @@ public class EssentialsLoaders : MonoBehaviour
         if(UICanvasManager.Instance == null)
         {
             Instantiate(uiCanvasManager);
+        }
+
+        BaseGameController baseGameController = FindObjectOfType<BaseGameController>();
+        if (baseGameController == null)
+        {
+            Instantiate(gameController);
         }
     }
 }

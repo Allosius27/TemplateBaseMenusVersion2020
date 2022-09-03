@@ -21,6 +21,7 @@ namespace AllosiusDev
             private enum AudioAction
             {
                 START,
+                STARTONESHOT,
                 STOP,
                 RESTART
             }
@@ -94,6 +95,16 @@ namespace AllosiusDev
                 AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach));
             }
 
+            public void PlayOneShotAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            {
+                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+            }
+
+            public void PlayOneShotAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            {
+                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach));
+            }
+
 
             public void PlayRandomAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
@@ -105,6 +116,18 @@ namespace AllosiusDev
             {
                 AudioData _data = _datas[Random.Range(0, _datas.Length)];
                 AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach));
+            }
+
+            public void PlayRandomOneShotAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            {
+                AudioData _data = _datas[Random.Range(0, _datas.Length)];
+                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+            }
+
+            public void PlayRandomOneShotAudio(AudioData[] _datas, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            {
+                AudioData _data = _datas[Random.Range(0, _datas.Length)];
+                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach));
             }
 
 
@@ -200,6 +223,9 @@ namespace AllosiusDev
                     case AudioAction.START:
                         PlaySound(_job);
                         break;
+                    case AudioAction.STARTONESHOT:
+                        PlayOneShotSound(_job);
+                        break;
                     case AudioAction.STOP when !_job.fade:
                         StopSound(_job);
                         break;
@@ -290,6 +316,43 @@ namespace AllosiusDev
 
                 source.SetSoundToSource(_job.data);
                 source.Play();
+
+                Debug.Log("Play Sound " + _job.data.name);
+            }
+
+            private void PlayOneShotSound(AudioJob _job)
+            {
+                AudioSource source = FindFreeAudiosource(_job, Instance.audioSources);
+                if (_job.transformToAttach == null)
+                {
+                    source.transform.parent = Instance.transform;
+                }
+                else
+                {
+                    source.transform.parent = _job.transformToAttach;
+                }
+                source.transform.localPosition = _job.positionOffset;
+                source.clip = _job.data.Clip;
+
+                if (_job.data.typeSound == AudioData.TypeSound.Music)
+                {
+                    source.outputAudioMixerGroup = Instance.outputMusics;
+                }
+                else if (_job.data.typeSound == AudioData.TypeSound.Sfx)
+                {
+                    source.outputAudioMixerGroup = Instance.outputSfx;
+                }
+                else if (_job.data.typeSound == AudioData.TypeSound.Ambients)
+                {
+                    source.outputAudioMixerGroup = Instance.outputAmbients;
+                }
+
+                _job.SetSource(source);
+
+                source.SetSoundToSource(_job.data);
+                source.PlayOneShot(_job.data.Clip);
+
+                Debug.Log("Play One Shot Sound " + _job.data.name);
             }
 
             private void StopSound(AudioJob _job)
