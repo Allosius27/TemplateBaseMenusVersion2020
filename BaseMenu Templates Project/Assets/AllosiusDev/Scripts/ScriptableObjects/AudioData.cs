@@ -15,7 +15,6 @@ namespace AllosiusDev.Audio
         #region Properties
 
         public AudioClip Clip => clip;
-        //public SoundParameters Parameters => parameters;
 
         public float Volume2d => volume2d;
         public float Volume3d => volume3d;
@@ -36,7 +35,6 @@ namespace AllosiusDev.Audio
         #region UnityInspector
 
         [SerializeField] private AudioClip clip;
-        //[SerializeField] private SoundParameters parameters;
 
         public TypeSound typeSound;
 

@@ -26,6 +26,10 @@ namespace AllosiusDev
                 RESTART
             }
 
+            private AudioJob currentJobRead;
+
+            Dictionary<AudioSource, bool> pauseStates = new Dictionary<AudioSource, bool>();
+
             #endregion
 
             #region UnityInspector
@@ -85,49 +89,65 @@ namespace AllosiusDev
 
             #region Public Functions
 
-            public void PlayAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.START, _data, _fade, _delay, Vector3.zero, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayOneShotAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayOneShotAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayOneShotAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayOneShotAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
 
-            public void PlayRandomAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayRandomAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
                 AudioData _data = _datas[Random.Range(0, _datas.Length)];
-                AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.START, _data, _fade, _delay, Vector3.zero, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayRandomAudio(AudioData[] _datas, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayRandomAudio(AudioData[] _datas, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
                 AudioData _data = _datas[Random.Range(0, _datas.Length)];
-                AddJob(new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.START, _data, _fade, _delay, _positionOffset, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayRandomOneShotAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayRandomOneShotAudio(AudioData[] _datas, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
                 AudioData _data = _datas[Random.Range(0, _datas.Length)];
-                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, Vector3.zero, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void PlayRandomOneShotAudio(AudioData[] _datas, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource PlayRandomOneShotAudio(AudioData[] _datas, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
                 AudioData _data = _datas[Random.Range(0, _datas.Length)];
-                AddJob(new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.STARTONESHOT, _data, _fade, _delay, _positionOffset, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
 
@@ -142,14 +162,44 @@ namespace AllosiusDev
             }
 
 
-            public void RestartAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource RestartAudio(AudioData _data, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.RESTART, _data, _fade, _delay, Vector3.zero, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.RESTART, _data, _fade, _delay, Vector3.zero, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
             }
 
-            public void RestartAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
+            public AudioSource RestartAudio(AudioData _data, Vector3 _positionOffset, Transform _transformToAttach = null, bool _fade = false, float _delay = 0.0F)
             {
-                AddJob(new AudioJob(AudioAction.RESTART, _data, _fade, _delay, _positionOffset, _transformToAttach));
+                currentJobRead = new AudioJob(AudioAction.RESTART, _data, _fade, _delay, _positionOffset, _transformToAttach);
+                AddJob(currentJobRead);
+                return currentJobRead.source;
+            }
+
+
+
+            public void PauseSpecificAudio(AudioSource source)
+            {
+                if (pauseStates.ContainsKey(source))
+                {
+                    pauseStates[source] = source.isPlaying;
+                    source.Pause();
+                }
+            }
+
+            public void ResumeSpecificAudio(AudioSource source)
+            {
+                if (pauseStates.ContainsKey(source))
+                {
+                    if (pauseStates[source])
+                    {
+                        source.Play();
+                    }
+
+                    pauseStates[source] = false;
+
+                    StartCoroutine(CoroutineResetAudio(source, source.clip));
+                }
             }
 
 
@@ -314,10 +364,18 @@ namespace AllosiusDev
 
                 _job.SetSource(source);
 
+                source.gameObject.name = "Audio Source " + _job.data.name;
                 source.SetSoundToSource(_job.data);
                 source.Play();
 
-                Debug.Log("Play Sound " + _job.data.name);
+                if (pauseStates.ContainsKey(source))
+                {
+                    pauseStates[source] = false;
+                }
+
+                Log("Play Sound " + _job.data.name);
+
+                StartCoroutine(CoroutineResetAudio(source, _job.data.Clip));
             }
 
             private void PlayOneShotSound(AudioJob _job)
@@ -349,21 +407,30 @@ namespace AllosiusDev
 
                 _job.SetSource(source);
 
+                source.gameObject.name = "Audio Source " + _job.data.name;
                 source.SetSoundToSource(_job.data);
                 source.PlayOneShot(_job.data.Clip);
 
-                Debug.Log("Play One Shot Sound " + _job.data.name);
+                if (pauseStates.ContainsKey(source))
+                {
+                    pauseStates[source] = false;
+                }
+
+                Log("Play One Shot Sound " + _job.data.name);
+
+                StartCoroutine(CoroutineResetAudio(source, _job.data.Clip));
             }
 
             private void StopSound(AudioJob _job)
             {
-                Debug.Log("Stop Sound " + _job.data.name);
+                Log("Stop Sound " + _job.data.name);
 
                 foreach (AudioSource audioSource in Instance.audioSources)
                 {
                     if (audioSource != null && audioSource.clip == _job.data.Clip)
                     {
                         audioSource.Stop();
+                        audioSource.clip = null;
                         //Destroy(audioSource.gameObject);
                     }
                 }
@@ -373,7 +440,10 @@ namespace AllosiusDev
             {
                 foreach (AudioSource audioSource in _audioSources)
                 {
-                    if (audioSource != null && !audioSource.isPlaying) return audioSource;
+                    if (audioSource != null && audioSource.clip == null)
+                    {
+                        return audioSource;
+                    }
                 }
                 return Instance.CreateNewAudioSource(_job);
             }
@@ -385,7 +455,35 @@ namespace AllosiusDev
                 AudioSource newAudioSource = go.AddComponent<AudioSource>();
                 newAudioSource.playOnAwake = false;
                 audioSources.Add(newAudioSource);
+                pauseStates.Add(newAudioSource, false);
                 return newAudioSource;
+            }
+
+            private IEnumerator CoroutineResetAudio(AudioSource source, AudioClip _clip)
+            {
+                if (source.clip != null && source.loop == false)
+                {
+                    Debug.Log(source.clip.name);
+                    yield return new WaitForSeconds(source.clip.length + 0.1f);
+
+                    if (source.clip == _clip && source.isPlaying == false)
+                    {
+                        if (pauseStates.ContainsKey(source))
+                        {
+                            if (pauseStates[source] == false)
+                            {
+                                yield return new WaitForSeconds(source.clip.length + 0.1f);
+
+                                if (source.clip == _clip && source.isPlaying == false)
+                                {
+                                    source.clip = null;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
             }
 
             private void Log(string _msg)
