@@ -1,4 +1,4 @@
-using AllosiusDev.Audio;
+using AllosiusDevUtilities.Audio;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

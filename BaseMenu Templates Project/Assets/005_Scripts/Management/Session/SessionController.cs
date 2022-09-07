@@ -1,6 +1,6 @@
 ﻿
 using UnityEngine;
-using AllosiusDev;
+using AllosiusDevUtilities;
 using Core;
 
 namespace Core

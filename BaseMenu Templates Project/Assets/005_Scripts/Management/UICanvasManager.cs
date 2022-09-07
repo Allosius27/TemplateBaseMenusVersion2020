@@ -1,10 +1,10 @@
-using AllosiusDev.Core.Menu;
+using AllosiusDevUtilities.Core.Menu;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UICanvasManager : AllosiusDev.Singleton<UICanvasManager>
+public class UICanvasManager : AllosiusDevUtilities.Singleton<UICanvasManager>
 {
     #region Fields
 

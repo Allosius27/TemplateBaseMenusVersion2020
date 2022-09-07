@@ -12,16 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6151fd00d781a7a46a8d4399e32151bc, type: 3}
   m_Name: sfx_ButtonClicked AudioData
   m_EditorClassIdentifier: 
-  sound:
-    clip: {fileID: 8300000, guid: 0c53d81f22504f847823a39ab8642ab4, type: 3}
-    parameters:
-      typeSound: 0
-      pitch: 1
-      loop: 0
-      priority: 128
-      parameters2d: 1
-      volume2d: 0.55
-      parameters3d: 0
-      volume3d: 0.53
-      spacialBlend: 0
-      maxDistance: 500
+  clip: {fileID: 8300000, guid: 0c53d81f22504f847823a39ab8642ab4, type: 3}
+  typeSound: 0
+  pitch: 1
+  loop: 0
+  priority: 128
+  parameters2d: 0
+  volume2d: 0.25
+  parameters3d: 0
+  volume3d: 0.25
+  spacialBlend: 0
+  _maxDistance: 500

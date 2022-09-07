@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using System.Linq;
-using AllosiusDev.Core.Menu;
+using AllosiusDevUtilities.Core.Menu;
 
 public class SettingsMenu : MonoBehaviour
 {

@@ -2,9 +2,9 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using AllosiusDev.Audio;
+using AllosiusDevUtilities.Audio;
 
-public class SceneLoader : AllosiusDev.Singleton<SceneLoader>
+public class SceneLoader : AllosiusDevUtilities.Singleton<SceneLoader>
 {
     private LoadingScreen _loadingScreen;
 

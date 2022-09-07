@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/007_Scenes/Menus/CreditsScene.unity
     guid: 395a0cda6e05ddb45aa1b315294820dd
   - enabled: 0
-    path: Assets/AllosiusDev/Scenes/Core/MenuDemo.unity
+    path: Assets/AllosiusDevCore/Core/Scenes/MenuDemo.unity
     guid: f0fe8ef7476d62d48a2c8702be05062b
   - enabled: 0
     path: Assets/UnityCore-master/Game.unity

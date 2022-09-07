@@ -1,6 +1,6 @@
 ﻿
-using AllosiusDev;
-using AllosiusDev.Audio;
+using AllosiusDevUtilities;
+using AllosiusDevUtilities.Audio;
 using UnityEngine;
 
 namespace UnityCore {
