@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using AllosiusDevUtilities.Core;
 
 public class EssentialsLoaders : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class EssentialsLoaders : MonoBehaviour
     [SerializeField] private LangueManager langueManager;
     [SerializeField] private SceneLoader sceneLoader;
     [SerializeField] private UICanvasManager uiCanvasManager;
+    [SerializeField] private GameStateManager gameStateManager;
 
     [SerializeField] private BaseGameController gameController;
 
@@ -42,6 +44,11 @@ public class EssentialsLoaders : MonoBehaviour
         if(UICanvasManager.Instance == null)
         {
             Instantiate(uiCanvasManager);
+        }
+
+        if(GameStateManager.Instance == null)
+        {
+            Instantiate(gameStateManager);
         }
 
         BaseGameController baseGameController = FindObjectOfType<BaseGameController>();

@@ -17,6 +17,8 @@ namespace AllosiusDevUtilities.Core
             public PageType entryPage;
             public Page[] pages;
 
+            private bool canClosePage = true;
+
             private Hashtable m_Pages;
             //private List<Page> m_OnList;
             //private List<Page> m_OffList;
@@ -34,24 +36,43 @@ namespace AllosiusDevUtilities.Core
                     TurnTypePagesOn(entryPage);
                 }
             }
-#endregion
 
-#region Public Functions
+            private void Update()
+            {
+                if (Input.GetButtonDown("Escape") && canClosePage)
+                {
+                    for (int i = pages.Length-1; i >= 0; i--)
+                    {
+                        Log(pages[i].gameObject.name);
+
+                        if(pages[i].isActive && pages[i].canEscapeClose)
+                        {
+                            TurnPageOff(pages[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Public Functions
             public void TurnPageOn(Page _page)
             {
                 if(_page == null)
                 {
                     return;
                 }
+                canClosePage = false;
                 _page.gameObject.SetActive(true);
-                _page.Animate(true);
+                _page.Animate(true, this);
             }
 
             public void TurnPageOff(Page _pageOff, Page _pageOn = null, bool _waitForExit = false)
             {
                 if (_pageOff.gameObject.activeSelf)
                 {
-                    _pageOff.Animate(false);
+                    _pageOff.Animate(false, this);
                 }
 
                 if (_waitForExit && _pageOff.useAnimation)
@@ -104,7 +125,7 @@ namespace AllosiusDevUtilities.Core
                 {
                     if (_offPages[i].gameObject.activeSelf)
                     {
-                        _offPages[i].Animate(false);
+                        _offPages[i].Animate(false, this);
                     }
 
                     if (_waitForExit && _offPages[i].useAnimation)
@@ -140,6 +161,12 @@ namespace AllosiusDevUtilities.Core
                 }
 
                 return false;
+            }
+
+            public void SetCanClosePage(bool value)
+            {
+                Log("SetCanClosePage");
+                canClosePage = value;
             }
 #endregion
 

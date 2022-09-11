@@ -5,16 +5,17 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
 using AllosiusDevUtilities.Audio;
+using AllosiusDevUtilities.Core.Menu;
+using AllosiusDevUtilities.Core;
 
 public class PauseMenu : MonoBehaviour
 {
     public Button[] MenuButtons => menuButtons;
 
-    public static bool gameIsPaused = false;
     public static bool canPause = true;
 
     public SettingsMenu settingsMenu;
-    public GameObject pauseMenuUI;
+    public Page pauseMenuUI;
 
     [SerializeField] private Button[] menuButtons;
 
@@ -23,6 +24,8 @@ public class PauseMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        pauseMenuUI.onClosePage += MenuResume;
+
         if (SceneManager.GetActiveScene().buildIndex == (int)(object)Scenes.MainMenu || SceneManager.GetActiveScene().buildIndex == (int)(object)Scenes.BootScene)
         {
             canPause = false;
@@ -44,39 +47,57 @@ public class PauseMenu : MonoBehaviour
 
     public void MenuPause()
     {
+        Debug.Log("MenuPause");
+
         if (canPause)
         {
-            if (gameIsPaused)
-            {
-                Resume();
-            }
-            else
+            if (!GameStateManager.gameIsPaused)
             {
                 Paused();
             }
         }
     }
 
+    public void MenuResume()
+    {
+        if (canPause)
+        {
+            if (GameStateManager.gameIsPaused)
+            {
+                Resume();
+            }
+        }
+    }
+
     public void Paused()
     {
+        Debug.Log("Pause");
+
         //Afficher le menu pause
-        pauseMenuUI.SetActive(true);
+        UICanvasManager.Instance.PageController.TurnPageOn(pauseMenuUI);
         UICanvasManager.Instance.EventSystem.SetSelectedGameObject(menuButtons[0].gameObject);
+
         // Arrêter le temps
         Time.timeScale = 0;
         // Changer le statut du jeu (l'état : pause ou jeu actif)
-        gameIsPaused = true;
+        GameStateManager.gameIsPaused = true;
+    }
 
+    public void ResumeAction()
+    {
+        UICanvasManager.Instance.PageController.TurnPageOff(pauseMenuUI);
     }
 
     public void Resume()
     {
+        Debug.Log("Resume");
+
         Time.timeScale = 1;
 
-        gameIsPaused = false;
+        GameStateManager.gameIsPaused = false;
 
         settingsMenu.ExitSettings();
-        pauseMenuUI.SetActive(false);
+        
     }
 
     public void LoadSettings()
@@ -88,9 +109,9 @@ public class PauseMenu : MonoBehaviour
 
     public void LoadMainMenu()
     {
-        canPause = false;
-        Resume();
+        ResumeAction();
         AudioController.Instance.StopAllMusics();
+        canPause = false;
         SceneLoader.Instance.ActiveLoadingScreen(mainMenuSceneData, 1.0f);
     }
 }

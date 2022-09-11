@@ -5,6 +5,7 @@ using UnityEngine.Audio;
 using UnityEngine.UI;
 using System.Linq;
 using AllosiusDevUtilities.Core.Menu;
+using AllosiusDevUtilities.Core;
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -173,7 +174,7 @@ public class SettingsMenu : MonoBehaviour
             mainMenu.enabled = true;
             UICanvasManager.Instance.EventSystem.SetSelectedGameObject(mainMenu.MenuButtons[0].gameObject);
         }
-        else if(PauseMenu.gameIsPaused)
+        else if(GameStateManager.gameIsPaused)
         {
             UICanvasManager.Instance.EventSystem.SetSelectedGameObject(UICanvasManager.Instance.PauseMenu.MenuButtons[0].gameObject);
         }
