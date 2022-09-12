@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using AllosiusDevCore;
 
 public class CreditsMenu : MonoBehaviour
 {

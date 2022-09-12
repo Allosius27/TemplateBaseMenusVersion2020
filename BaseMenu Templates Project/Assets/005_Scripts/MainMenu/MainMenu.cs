@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEditor;
 using AllosiusDevUtilities.Audio;
+using AllosiusDevCore;
 
 public class MainMenu : MonoBehaviour
 {

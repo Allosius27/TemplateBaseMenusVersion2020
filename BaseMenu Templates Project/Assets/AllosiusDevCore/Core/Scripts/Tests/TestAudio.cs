@@ -3,7 +3,7 @@ using AllosiusDevUtilities;
 using AllosiusDevUtilities.Audio;
 using UnityEngine;
 
-namespace UnityCore {
+namespace AllosiusDevCore {
 
     namespace Audio {
 

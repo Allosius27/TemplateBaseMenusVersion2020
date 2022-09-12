@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using AllosiusDevUtilities.Audio;
 using AllosiusDevUtilities.Core.Menu;
 using AllosiusDevUtilities.Core;
+using AllosiusDevCore;
 
 public class PauseMenu : MonoBehaviour
 {
