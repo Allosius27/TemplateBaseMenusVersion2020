@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using System.Linq;
 using AllosiusDevUtilities.Core.Menu;
 using AllosiusDevUtilities.Core;
+using AllosiusDevCore;
 
 public class SettingsMenu : MonoBehaviour
 {
