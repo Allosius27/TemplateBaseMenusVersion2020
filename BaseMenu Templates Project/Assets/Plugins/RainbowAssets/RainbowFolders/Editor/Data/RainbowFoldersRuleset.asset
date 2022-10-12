@@ -338,7 +338,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 0
     IsHidden: 0
   - Type: 1
-    Key: Assets/001_Graphics
+    Key: Assets/Graphics
     Ordinal: 27
     Priority: 0
     IconType: 80
@@ -350,7 +350,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/002_AudioResources
+    Key: Assets/AudioResources
     Ordinal: 28
     Priority: 0
     IconType: 2520
@@ -362,7 +362,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/003_Animations
+    Key: Assets/Animations
     Ordinal: 29
     Priority: 0
     IconType: 2510
@@ -374,7 +374,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/004_Prefabs
+    Key: Assets/Prefabs
     Ordinal: 30
     Priority: 0
     IconType: 2610
@@ -386,7 +386,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/005_Scripts
+    Key: Assets/Scripts
     Ordinal: 31
     Priority: 0
     IconType: 2660
@@ -398,7 +398,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/006_DataFiles
+    Key: Assets/DataFiles
     Ordinal: 32
     Priority: 0
     IconType: 2540
@@ -410,7 +410,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/007_Scenes
+    Key: Assets/Scenes
     Ordinal: 33
     Priority: 0
     IconType: 2650
@@ -422,7 +422,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/008_AssetsImport
+    Key: Assets/ImportedAssets
     Ordinal: 34
     Priority: 0
     IconType: 240
@@ -434,7 +434,7 @@ MonoBehaviour:
     IsBackgroundRecursive: 1
     IsHidden: 0
   - Type: 1
-    Key: Assets/009_PackagesAnnexes
+    Key: Assets/PackagesAnnexes
     Ordinal: 35
     Priority: 0
     IconType: 2620
