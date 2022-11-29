@@ -94,7 +94,7 @@ public class MainMenu : MonoBehaviour
 
     public void NewGame(float _timeToWait)
     {
-        PauseMenu.canPause = true;
+        //PauseMenu.canPause = true;
         //StartCoroutine(SceneLoader.Instance.LoadAsynchronously(Scenes.Level));
         SceneLoader.Instance.ActiveLoadingScreen(startLevelSceneData, _timeToWait);
 
